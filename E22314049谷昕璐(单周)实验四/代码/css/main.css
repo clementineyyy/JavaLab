@@ -1,0 +1,154 @@
+:root {
+  /* 主色调 */
+  --primary-color: #4f46e5;
+  --primary-light: #818cf8;
+  --primary-dark: #3730a3;
+
+  /* 辅助色 */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #3b82f6;
+
+  /* 中性色 */
+  --bg-color: #f9fafb;
+  --surface-color: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+}
+
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--primary-dark);
+  color: #fff;
+  box-shadow: 2px 0 10px var(--shadow-color);
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 15px;
+  background: var(--surface-color);
+  box-shadow: 0 2px 10px var(--shadow-color);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-title p {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 70px;
+  }
+
+  .main-content {
+    margin-left: 70px;
+  }
+
+  .top-bar {
+    padding: 15px;
+  }
+
+  .content-container {
+    padding: 0 15px 15px;
+  }
+}
+
+.sidebar.collapsed {
+  width: 70px;
+  min-width: 70px;
+}
+
+.sidebar.collapsed .title,
+.sidebar.collapsed .user-info {
+  display: none;
+}
+
+/* 确保优先级足够高 */
+.layout .sidebar.collapsed {
+  width: 70px !important;
+}
+
+#studentTableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+}
+
+/* 空数据提示 */
+.empty-data {
+  text-align: center;
+  padding: 30px;
+  color: #8a94a6;
+  font-style: italic;
+}
+
+/* 表格分页器美化 */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  gap: 8px;
+}
+
+.pagination button {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 15px;
+  min-width: 80px; /* 设置最小宽度 */
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 36px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #f0f4ff;
+}
+
+.pagination button.active {
+  background-color: #4a6baf;
+  color: white;
+}
