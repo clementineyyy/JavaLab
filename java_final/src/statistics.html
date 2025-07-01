@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 成绩统计</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout-fixes.css">
+    <script src="javascript/common.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<div class="layout">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu active">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;"/>
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="top-bar">
+                <h1>成绩统计</h1>
+                <p>查看学生成绩数据统计</p>
+            </div>
+
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>成绩数据分析</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="filter-bar">
+                            <div class="filter-group">
+                                <label for="studentIdFilter">学号：</label>
+                                <input type="text" id="studentIdFilter" placeholder="按学号筛选">
+                            </div>
+                            <button id="filterBtn" class="btn btn-primary">筛选</button>
+                            <button id="resetFilterBtn" class="btn btn-secondary">重置</button>
+                        </div>
+
+                        <!-- 数据表格 -->
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>课程</th>
+                                    <th>成绩</th>
+                                    <th>排名</th>
+                                    <th>统计</th>
+                                </tr>
+                                </thead>
+                                <tbody id="statisticsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="javascript/dataService.js" type="module"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async function() {
+            if (!window.dataService) {
+                const module = await import('./javascript/dataService.js');
+                window.dataService = module;
+            }
+
+            loadStatisticsData();
+        });
+
+        async function loadStatisticsData() {
+          try {
+            const students = await window.dataService.fetchStudents();
+            const grades = await window.dataService.fetchGrades();
+
+            console.log('从API获取的学生数据:', students.length);
+            console.log('从API获取的成绩数据:', grades.length);
+
+            // 清空表格内容
+            const tableBody = document.getElementById('statisticsTableBody');
+            tableBody.innerHTML = '';
+
+            // 按学生分组成绩数据
+            const studentGrades = {};
+            students.forEach(student => {
+              studentGrades[student.id] = {
+                student: student,
+                grades: grades.filter(grade => String(grade.student_id) === String(student.id)),
+                stats: {
+                  average: 0,
+                  highest: 0,
+                  lowest: 100,
+                  totalCourses: 0
+                }
+              };
+            });
+
+            // 计算统计数据
+            Object.keys(studentGrades).forEach(studentId => {
+              const data = studentGrades[studentId];
+              if (data.grades.length > 0) {
+                const scores = data.grades.map(grade => parseFloat(grade.score) || 0);
+                data.stats.average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                data.stats.highest = Math.max(...scores);
+                data.stats.lowest = Math.min(...scores);
+                data.stats.totalCourses = data.grades.length;
+              }
+            });
+
+            // 计算排名
+            const rankedStudents = Object.values(studentGrades)
+              .filter(data => data.grades.length > 0)
+              .sort((a, b) => b.stats.average - a.stats.average);
+
+            // 填充表格
+            rankedStudents.forEach((data, index) => {
+              const student = data.student;
+              const stats = data.stats;
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${stats.totalCourses}门</td>
+                <td>${stats.average.toFixed(1)}分</td>
+                <td>${index + 1}</td>
+                <td>最高: ${stats.highest}分 | 最低: ${stats.lowest}分</td>
+              `;
+              tableBody.appendChild(row);
+            });
+
+
+            // 如果没有数据，显示提示
+            if (rankedStudents.length === 0) {
+              const emptyRow = document.createElement('tr');
+              emptyRow.innerHTML = '<td colspan="6" class="no-data">暂无成绩数据</td>';
+              tableBody.appendChild(emptyRow);
+            }
+          } catch (error) {
+            console.error('加载统计数据失败:', error);
+            alert('加载统计数据失败，请检查网络连接或后端服务是否正常');
+          }
+        }
+
+        // 筛选功能
+        function setupFilters() {
+            const filterBtn = document.getElementById('filterBtn');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+            filterBtn.addEventListener('click', function() {
+                filterStatistics();
+            });
+
+            resetFilterBtn.addEventListener('click', function() {
+                document.getElementById('studentIdFilter').value = '';
+                loadStatisticsData();
+            });
+        }
+
+        async function filterStatistics() {
+          try {
+            // 获取过滤条件
+            const studentIdFilter = document.getElementById('studentIdFilter').value.trim();
+
+            console.log('筛选条件:', {studentId: studentIdFilter});
+
+            // 从API获取数据
+            const students = await window.dataService.fetchStudents();
+            const grades = await window.dataService.fetchGrades();
+
+            console.log('获取数据完成 - 学生:', students.length, '成绩:', grades.length);
+
+            // 清空表格内容
+            const tableBody = document.getElementById('statisticsTableBody');
+            tableBody.innerHTML = '';
+
+            // 筛选学生
+            let filteredStudents = students;
+            if (studentIdFilter) {
+              filteredStudents = students.filter(student => {
+                // 尝试多种匹配方式，处理不同字段名和类型
+                return String(student.id) === studentIdFilter ||
+                       String(student.studentId) === studentIdFilter ||
+                       (student.name && student.name.includes(studentIdFilter));
+              });
+              console.log('筛选后的学生:', filteredStudents.length);
+            }
+
+            // 筛选成绩
+            let filteredGrades = grades;
+
+            // 按学生分组成绩数据
+            const studentGrades = {};
+
+            filteredStudents.forEach(student => {
+              // 获取该学生的成绩
+              const studentGradeData = filteredGrades.filter(grade =>
+                String(grade.student_id) === String(student.id) ||
+                String(grade.studentId) === String(student.id)
+              );
+
+              if (studentGradeData.length > 0) {
+                studentGrades[student.id] = {
+                  student: student,
+                  grades: studentGradeData,
+                  stats: {
+                    average: 0,
+                    highest: 0,
+                    lowest: 100,
+                    totalCourses: 0
+                  }
+                };
+              }
+            });
+
+            // 计算统计数据
+            Object.keys(studentGrades).forEach(studentId => {
+              const data = studentGrades[studentId];
+              if (data.grades.length > 0) {
+                const scores = data.grades.map(grade =>
+                  parseFloat(grade.score || grade.score || 0)
+                );
+                data.stats.average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                data.stats.highest = Math.max(...scores);
+                data.stats.lowest = Math.min(...scores);
+                data.stats.totalCourses = data.grades.length;
+              }
+            });
+
+            // 计算排名
+            const rankedStudents = Object.values(studentGrades)
+              .filter(data => data.grades.length > 0)
+              .sort((a, b) => b.stats.average - a.stats.average);
+
+            console.log("筛选后的结果:", rankedStudents.length);
+
+            // 填充表格
+            rankedStudents.forEach((data, index) => {
+              const student = data.student;
+              const stats = data.stats;
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${stats.totalCourses}门</td>
+                <td>${stats.average.toFixed(1)}分</td>
+                <td>${index + 1}</td>
+                <td>最高: ${stats.highest}分 | 最低: ${stats.lowest}分</td>
+              `;
+              tableBody.appendChild(row);
+            });
+
+              if (rankedStudents.length === 0) {
+                  const emptyRow = document.createElement('tr');
+                  emptyRow.innerHTML = '<td colspan="6" class="no-data">暂无符合条件的成绩数据</td>';
+                  tableBody.appendChild(emptyRow);
+              }
+          } catch (error) {
+            console.error('筛选统计数据失败:', error);
+            alert('筛选数据失败: ' + error.message);
+          }
+        }
+
+        // 导入数据功能
+        function importDataFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('请选择一个 JSON 文件！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // 解析 JSON 数据
+                    const data = JSON.parse(e.target.result);
+
+                    // 验证数据结构
+                    if (data.students && data.teachers && data.admins && data.courses && data.grades && data.certificates && data.users) {
+                        // 将数据存入 localStorage
+                        localStorage.setItem('students', JSON.stringify(data.students));
+                        localStorage.setItem('teachers', JSON.stringify(data.teachers));
+                        localStorage.setItem('admins', JSON.stringify(data.admins));
+                        localStorage.setItem('courses', JSON.stringify(data.courses));
+                        localStorage.setItem('grades', JSON.stringify(data.grades));
+                        localStorage.setItem('certificates', JSON.stringify(data.certificates));
+                        localStorage.setItem('users', JSON.stringify(data.users));
+
+                        // 如果包含当前用户信息，则更新
+                        if (data.currentUser) {
+                            localStorage.setItem('currentUser', JSON.stringify(data.currentUser));
+                        }
+
+                        alert('数据导入成功！请刷新页面以查看更新。');
+                    } else {
+                        alert('文件格式不正确，请检查 JSON 数据结构！');
+                    }
+                } catch (error) {
+                    alert('导入失败：文件内容无效或解析错误！');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 绑定导入按钮事件
+            document.getElementById('importDataBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+
+            // 绑定文件输入事件
+            document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            importIcon.className = 'icon';
+            importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            exportIcon.className = 'icon';
+            exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            logoutIcon.className = 'icon';
+            logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+
+            // 初始化默认数据
+            if(typeof initDefaultData === 'function') {
+                initDefaultData();
+            }
+
+            // 获取当前用户信息
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+            if (!currentUser.username) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            const userRole = currentUser.role || 'student';
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+            // 设置用户头像
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+            // 显示相应的菜单
+            if(typeof showMenusByRole === 'function') {
+                showMenusByRole(userRole);
+            }
+
+            // 侧边栏切换
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('collapsed');
+                document.querySelector('.main-content').classList.toggle('expanded');
+
+                // 根据侧边栏状态切换图标方向
+                const icon = this.querySelector('i');
+                if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                    icon.classList.remove('fa-angle-left');
+                    icon.classList.add('fa-angle-right');
+                } else {
+                    icon.classList.remove('fa-angle-right');
+                    icon.classList.add('fa-angle-left');
+                }
+            });
+
+            loadStatisticsData();
+
+            // 设置筛选功能
+            setupFilters();
+
+            // 退出登录
+            document.querySelectorAll('#logoutBtn, #logoutBtnBottom').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('确定要退出登录吗？')) {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'index.html';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

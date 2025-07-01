@@ -1,0 +1,1166 @@
+<!--本文件的功能：
+1.个人基本信息展示
+2.成绩、证书和考勤记录的选项卡展示
+3.添加成绩、添加证书和编辑学生信息的弹窗功能
+4.对应的表单验证和数据操作-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生详情 | 学业管理系统</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .student-detail-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .info-card {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .student-basic-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .student-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: #4caf50;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-badge::before {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-item {
+            display: flex;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .info-label {
+            width: 80px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .tab-navigation {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .detail-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .detail-tab.active {
+            color: #2575fc;
+        }
+
+        .detail-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #2575fc;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grade-card {
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .grade-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .semester {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .score-average {
+            color: #2575fc;
+            font-weight: 600;
+        }
+
+        .course-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .course-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .course-info {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .course-score {
+            font-weight: 600;
+        }
+
+        .score-excellent {
+            color: #4caf50;
+        }
+
+        .score-good {
+            color: #2196f3;
+        }
+
+        .score-average {
+            color: #ff9800;
+        }
+
+        .score-fail {
+            color: #f44336;
+        }
+
+        .certificate-item {
+            display: flex;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .cert-icon {
+            width: 60px;
+            height: 60px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .cert-icon img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .cert-info {
+            flex: 1;
+        }
+
+        .cert-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .cert-meta {
+            display: flex;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .cert-meta-item {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cert-meta-item::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #2575fc;
+            margin-right: 5px;
+        }
+
+        .cert-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .file-link {
+            color: #2575fc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-link::before {
+            content: '📄';
+            margin-right: 3px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f0f7ff;
+            color: #2575fc;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .achievement-badge::before {
+            content: '🏆';
+            margin-right: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边导航 -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="system-logo small">
+                    <div class="logo-animation small"></div>
+                    <h2>学业管理系统</h2>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">
+                    <span class="avatar-text" id="avatarText">管</span>
+                </div>
+                <div class="user-details">
+                    <h3 id="userName">管理员</h3>
+                    <span class="role-badge admin" id="userRole">系统管理员</span>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon dashboard-icon"></span>
+                    <span class="nav-text">控制面板</span>
+                </a>
+                <a href="student-management.html" class="nav-item active">
+                    <span class="nav-icon student-icon"></span>
+                    <span class="nav-text">学生管理</span>
+                </a>
+                <a href="course-management.html" class="nav-item">
+                    <span class="nav-icon course-icon"></span>
+                    <span class="nav-text">课程管理</span>
+                </a>
+                <a href="grade-management.html" class="nav-item">
+                    <span class="nav-icon grade-icon"></span>
+                    <span class="nav-text">成绩管理</span>
+                </a>
+                <a href="certificate.html" class="nav-item">
+                    <span class="nav-icon certificate-icon"></span>
+                    <span class="nav-text">证书管理</span>
+                </a>
+                <a href="analytics.html" class="nav-item">
+                    <span class="nav-icon analytics-icon"></span>
+                    <span class="nav-text">成绩统计</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="nav-icon logout-icon"></span>
+                    <span class="nav-text">退出登录</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>学生详情</h1>
+                <div class="breadcrumb">
+                    <a href="dashboard.html">首页</a> /
+                    <a href="student-management.html">学生管理</a> /
+                    <span>学生详情</span>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="action-bar">
+                    <div class="back-button" onclick="history.back();">
+                        <span class="back-icon"></span>
+                        <span>返回列表</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline" id="editStudentBtn">编辑信息</button>
+                        <button class="btn btn-primary" id="addGradeBtn">添加成绩</button>
+                        <button class="btn btn-success" id="addCertificateBtn">查看证书</button>
+                    </div>
+                </div>
+
+                <div class="student-detail-container">
+                    <!-- 左侧个人信息 -->
+                    <div class="info-card">
+                        <div class="student-basic-info">
+                            <div class="student-avatar">
+                                <span id="studentInitial">张</span>
+                                <div class="avatar-badge"></div>
+                            </div>
+                            <h2 id="studentName">张三</h2>
+                            <div class="student-status">
+                                <span class="achievement-badge">成绩优异</span>
+                                <span class="achievement-badge">班级干部</span>
+                            </div>
+                        </div>
+
+                        <div class="student-info-list" style="margin-top: 20px;">
+                            <div class="info-item">
+                                <div class="info-label">学号</div>
+                                <div class="info-value" id="studentIdDisplay">S001</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">年级专业</div>
+                                <div class="info-value" id="studentGradeMajor">大二 / 计算机科学与技术</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">性别</div>
+                                <div class="info-value" id="studentGender">男</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">年龄</div>
+                                <div class="info-value" id="studentAge">20</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">邮箱</div>
+                                <div class="info-value" id="studentEmail">zhangsan@example.com</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">入学时间</div>
+                                <div class="info-value" id="studentEnrollDate">2022-09-01</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">学籍状态</div>
+                                <div class="info-value"><span class="status-badge active">在读</span></div>
+                            </div>
+                        </div>
+
+                        <div class="student-statistics" style="margin-top: 20px;">
+                            <h3>学业概况</h3>
+                            <div class="stat-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <div class="stat-card" style="background: #f0f7ff; padding: 10px; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: #666;">平均成绩</div>
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #2575fc;">89.5</div>
+                                </div>
+                                <div class="stat-card" style="background: #fff8e6; padding: 10px; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: #666;">修读学分</div>
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #ff9800;">68/120</div>
+                                </div>
+                                <div class="stat-card" style="background: #e8f5e9; padding: 10px; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: #666;">获得证书</div>
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #4caf50;">3</div>
+                                </div>
+                                <div class="stat-card" style="background: #f3e5f5; padding: 10px; border-radius: 6px;">
+                                    <div style="font-size: 0.9rem; color: #666;">排名</div>
+                                    <div style="font-size: 1.5rem; font-weight: 600; color: #9c27b0;">12/45</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧选项卡内容 -->
+                    <div class="info-card">
+                        <div class="tab-navigation">
+                            <div class="detail-tab active" data-tab="grades">成绩记录</div>
+                            <div class="detail-tab" data-tab="certificates">证书记录</div>
+                            <div class="detail-tab" data-tab="attendance">考勤记录</div>
+                        </div>
+
+                        <!-- 成绩记录 -->
+                        <div class="tab-content active" id="gradesTab">
+                            <div class="grade-card">
+                                <div class="grade-header">
+                                    <div class="semester">2023-2024 第一学期</div>
+                                    <div class="score-average">学期均分：91.2</div>
+                                </div>
+                                <div class="course-list">
+                                    <div class="course-item">
+                                        <div class="course-title">数据结构</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">4学分 | 必修</div>
+                                            <div class="course-score score-excellent">95</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">计算机网络</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">3学分 | 必修</div>
+                                            <div class="course-score score-good">88</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">操作系统</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">4学分 | 必修</div>
+                                            <div class="course-score score-excellent">92</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">高等数学(下)</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">5学分 | 必修</div>
+                                            <div class="course-score score-excellent">90</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grade-card">
+                                <div class="grade-header">
+                                    <div class="semester">2023-2024 第二学期</div>
+                                    <div class="score-average">学期均分：87.8</div>
+                                </div>
+                                <div class="course-list">
+                                    <div class="course-item">
+                                        <div class="course-title">人工智能导论</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">3学分 | 选修</div>
+                                            <div class="course-score score-excellent">93</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">编译原理</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">4学分 | 必修</div>
+                                            <div class="course-score score-average">78</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">数据库系统</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">4学分 | 必修</div>
+                                            <div class="course-score score-good">86</div>
+                                        </div>
+                                    </div>
+                                    <div class="course-item">
+                                        <div class="course-title">软件工程</div>
+                                        <div class="course-info">
+                                            <div class="course-credit">3学分 | 必修</div>
+                                            <div class="course-score score-excellent">94</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 证书记录 -->
+                        <div class="tab-content" id="certificatesTab">
+                            <div class="certificate-item">
+                                <div class="cert-icon">
+                                    <span style="font-size: 1.5rem;">🏆</span>
+                                </div>
+                                <div class="cert-info">
+                                    <div class="cert-title">英语四级证书</div>
+                                    <div class="cert-meta">
+                                        <div class="cert-meta-item">证书编号: CET4-2022-12345</div>
+                                        <div class="cert-meta-item">获得时间: 2022-12-20</div>
+                                    </div>
+                                </div>
+                                <div class="cert-actions">
+                                    <span class="file-link">查看证书</span>
+                                </div>
+                            </div>
+
+                            <div class="certificate-item">
+                                <div class="cert-icon">
+                                    <span style="font-size: 1.5rem;">🏆</span>
+                                </div>
+                                <div class="cert-info">
+                                    <div class="cert-title">计算机二级证书 (Python)</div>
+                                    <div class="cert-meta">
+                                        <div class="cert-meta-item">证书编号: NCRE2-2023-78901</div>
+                                        <div class="cert-meta-item">获得时间: 2023-03-15</div>
+                                    </div>
+                                </div>
+                                <div class="cert-actions">
+                                    <span class="file-link">查看证书</span>
+                                </div>
+                            </div>
+
+                            <div class="certificate-item">
+                                <div class="cert-icon">
+                                    <span style="font-size: 1.5rem;">🏆</span>
+                                </div>
+                                <div class="cert-info">
+                                    <div class="cert-title">英语六级证书</div>
+                                    <div class="cert-meta">
+                                        <div class="cert-meta-item">证书编号: CET6-2023-56789</div>
+                                        <div class="cert-meta-item">获得时间: 2023-06-25</div>
+                                    </div>
+                                </div>
+                                <div class="cert-actions">
+                                    <span class="file-link">查看证书</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 考勤记录 -->
+                        <div class="tab-content" id="attendanceTab">
+                            <p class="empty-state">
+                                <div class="empty-icon">📊</div>
+                                目前没有考勤记录
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加成绩弹窗 -->
+    <div class="modal" id="gradeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加成绩记录</h2>
+                <button class="modal-close" id="closeGradeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="gradeForm">
+                    <div class="form-group">
+                        <label for="semester">学期*</label>
+                        <select id="semester" required>
+                            <option value="">请选择学期</option>
+                            <option value="2022-2023-1">2022-2023 第一学期</option>
+                            <option value="2022-2023-2">2022-2023 第二学期</option>
+                            <option value="2023-2024-1">2023-2024 第一学期</option>
+                            <option value="2023-2024-2">2023-2024 第二学期</option>
+                        </select>
+                        <span class="error-message" id="semester-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="course">课程*</label>
+                        <select id="course" required>
+                            <option value="">请选择课程</option>
+                        </select>
+                        <span class="error-message" id="course-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="score">成绩*</label>
+                        <input type="number" id="score" min="0" max="100" required>
+                        <span class="error-message" id="score-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="examDate">考试日期</label>
+                        <input type="date" id="examDate">
+                        <span class="error-message" id="examDate-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">备注</label>
+                        <textarea id="comment" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelGradeBtn">取消</button>
+                <button class="btn btn-primary" id="saveGradeBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加证书弹窗 -->
+    <div class="modal" id="certificateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加证书记录</h2>
+                <button class="modal-close" id="closeCertModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="certificateForm">
+                    <div class="form-group">
+                        <label for="certName">证书名称*</label>
+                        <input type="text" id="certName" required>
+                        <span class="error-message" id="certName-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="certNumber">证书编号*</label>
+                        <input type="text" id="certNumber" required>
+                        <span class="error-message" id="certNumber-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="certType">证书类型</label>
+                        <select id="certType">
+                            <option value="language">语言类</option>
+                            <option value="professional">专业类</option>
+                            <option value="skill">技能类</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueDate">颁发日期*</label>
+                        <input type="date" id="issueDate" required>
+                        <span class="error-message" id="issueDate-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="certFile">证书文件</label>
+                        <input type="file" id="certFile" accept="image/*,.pdf">
+                        <span class="error-message" id="certFile-error"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancelCertBtn">取消</button>
+                    <button class="btn btn-primary" id="saveCertBtn">保存</button>
+                </div>
+                        </div>
+                    </div>
+
+                    <!-- 编辑学生信息弹窗 -->
+                    <div class="modal" id="editStudentModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>编辑学生信息</h2>
+                                <button class="modal-close" id="closeEditModal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editStudentForm">
+                                    <div class="form-group">
+                                        <label for="editName">姓名*</label>
+                                        <input type="text" id="editName" required>
+                                        <span class="error-message" id="editName-error"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editGender">性别*</label>
+                                        <select id="editGender" required>
+                                            <option value="男">男</option>
+                                            <option value="女">女</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editAge">年龄*</label>
+                                        <input type="number" id="editAge" min="16" max="50" required>
+                                        <span class="error-message" id="editAge-error"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editMajor">专业*</label>
+                                        <select id="editMajor" required>
+                                            <option value="计算机科学与技术">计算机科学与技术</option>
+                                            <option value="软件工程">软件工程</option>
+                                            <option value="信息安全">信息安全</option>
+                                            <option value="人工智能">人工智能</option>
+                                            <option value="数据科学">数据科学</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEmail">邮箱</label>
+                                        <input type="email" id="editEmail">
+                                        <span class="error-message" id="editEmail-error"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editStatus">学籍状态</label>
+                                        <select id="editStatus">
+                                            <option value="在读">在读</option>
+                                            <option value="休学">休学</option>
+                                            <option value="退学">退学</option>
+                                            <option value="毕业">毕业</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-outline" id="cancelEditBtn">取消</button>
+                                <button class="btn btn-primary" id="saveEditBtn">保存</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script src="js/common.js"></script>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // 获取URL参数
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const studentId = urlParams.get('id') || 'S001'; // 默认ID
+
+                            // 模拟学生数据加载
+                            loadStudentData(studentId);
+
+                            // 选项卡切换
+                            const tabs = document.querySelectorAll('.detail-tab');
+                            tabs.forEach(tab => {
+                                tab.addEventListener('click', function() {
+                                    tabs.forEach(t => t.classList.remove('active'));
+                                    this.classList.add('active');
+
+                                    // 显示对应内容
+                                    const tabId = this.getAttribute('data-tab');
+                                    document.querySelectorAll('.tab-content').forEach(content => {
+                                        content.classList.remove('active');
+                                    });
+                                    document.getElementById(tabId + 'Tab').classList.add('active');
+                                });
+                            });
+
+                            // 弹窗相关
+                            const gradeModal = document.getElementById('gradeModal');
+                            const certificateModal = document.getElementById('certificateModal');
+                            const editStudentModal = document.getElementById('editStudentModal');
+
+                            // 添加成绩按钮
+                            document.getElementById('addGradeBtn').addEventListener('click', function() {
+                                gradeModal.style.display = 'flex';
+                                loadCourseOptions();
+                            });
+
+                            // 关闭成绩弹窗
+                            document.getElementById('closeGradeModal').addEventListener('click', function() {
+                                gradeModal.style.display = 'none';
+                            });
+
+                            document.getElementById('cancelGradeBtn').addEventListener('click', function() {
+                                gradeModal.style.display = 'none';
+                            });
+
+                            // 添加证书按钮
+                            document.getElementById('addCertificateBtn').addEventListener('click', function() {
+                                certificateModal.style.display = 'flex';
+                            });
+
+                            // 关闭证书弹窗
+                            document.getElementById('closeCertModal').addEventListener('click', function() {
+                                certificateModal.style.display = 'none';
+                            });
+
+                            document.getElementById('cancelCertBtn').addEventListener('click', function() {
+                                certificateModal.style.display = 'none';
+                            });
+
+                            // 编辑学生信息按钮
+                            document.getElementById('editStudentBtn').addEventListener('click', function() {
+                                // 预填充表单
+                                document.getElementById('editName').value = document.getElementById('studentName').innerText;
+                                document.getElementById('editGender').value = document.getElementById('studentGender').innerText;
+                                document.getElementById('editAge').value = document.getElementById('studentAge').innerText;
+                                document.getElementById('editEmail').value = document.getElementById('studentEmail').innerText;
+
+                                // 从专业信息中提取专业
+                                const gradeMajor = document.getElementById('studentGradeMajor').innerText;
+                                const major = gradeMajor.split('/')[1].trim();
+                                document.getElementById('editMajor').value = major;
+
+                                editStudentModal.style.display = 'flex';
+                            });
+
+                            // 关闭编辑弹窗
+                            document.getElementById('closeEditModal').addEventListener('click', function() {
+                                editStudentModal.style.display = 'none';
+                            });
+
+                            document.getElementById('cancelEditBtn').addEventListener('click', function() {
+                                editStudentModal.style.display = 'none';
+                            });
+
+                            // 保存学生信息
+                            document.getElementById('saveEditBtn').addEventListener('click', function() {
+                                if (validateEditForm()) {
+                                    // 模拟保存
+                                    document.getElementById('studentName').innerText = document.getElementById('editName').value;
+                                    document.getElementById('studentInitial').innerText = document.getElementById('editName').value.charAt(0);
+                                    document.getElementById('studentGender').innerText = document.getElementById('editGender').value;
+                                    document.getElementById('studentAge').innerText = document.getElementById('editAge').value;
+                                    document.getElementById('studentEmail').innerText = document.getElementById('editEmail').value;
+
+                                    // 更新专业信息
+                                    const grade = document.getElementById('studentGradeMajor').innerText.split('/')[0].trim();
+                                    const newMajor = document.getElementById('editMajor').value;
+                                    document.getElementById('studentGradeMajor').innerText = `${grade} / ${newMajor}`;
+
+                                    // 关闭弹窗
+                                    editStudentModal.style.display = 'none';
+
+                                    showToast('学生信息更新成功！', 'success');
+                                }
+                            });
+
+                            // 保存成绩记录
+                            document.getElementById('saveGradeBtn').addEventListener('click', function() {
+                                if (validateGradeForm()) {
+                                    // 模拟保存成绩
+                                    const semester = document.getElementById('semester').value;
+                                    const course = document.getElementById('course').value;
+                                    const score = document.getElementById('score').value;
+
+                                    // 简单检查是否已存在该学期卡片
+                                    let semesterCard = null;
+                                    const semesterDisplay = getSemesterDisplay(semester);
+                                    const existingCards = document.querySelectorAll('.grade-card');
+
+                                    for (const card of existingCards) {
+                                        if (card.querySelector('.semester').innerText === semesterDisplay) {
+                                            semesterCard = card;
+                                            break;
+                                        }
+                                    }
+
+                                    // 如果学期卡片不存在，创建新的
+                                    if (!semesterCard) {
+                                        semesterCard = createSemesterCard(semesterDisplay);
+                                        document.getElementById('gradesTab').appendChild(semesterCard);
+                                    }
+
+                                    // 添加课程到学期卡片
+                                    const courseList = semesterCard.querySelector('.course-list');
+                                    const courseItem = createCourseItem(course, score);
+                                    courseList.appendChild(courseItem);
+
+                                    // 关闭弹窗
+                                    gradeModal.style.display = 'none';
+                                    document.getElementById('gradeForm').reset();
+
+                                    showToast('成绩添加成功！', 'success');
+                                }
+                            });
+
+                            // 保存证书记录
+                            document.getElementById('saveCertBtn').addEventListener('click', function() {
+                                if (validateCertForm()) {
+                                    // 模拟保存证书
+                                    const certName = document.getElementById('certName').value;
+                                    const certNumber = document.getElementById('certNumber').value;
+                                    const issueDate = document.getElementById('issueDate').value;
+
+                                    // 创建证书条目
+                                    const certItem = createCertificateItem(certName, certNumber, issueDate);
+                                    document.getElementById('certificatesTab').appendChild(certItem);
+
+                                    // 关闭弹窗
+                                    certificateModal.style.display = 'none';
+                                    document.getElementById('certificateForm').reset();
+
+                                    showToast('证书添加成功！', 'success');
+                                }
+                            });
+
+
+                            window.addEventListener('click', function(event) {
+                                if (event.target === gradeModal) {
+                                    gradeModal.style.display = 'none';
+                                }
+                                if (event.target === certificateModal) {
+                                    certificateModal.style.display = 'none';
+                                }
+                                if (event.target === editStudentModal) {
+                                    editStudentModal.style.display = 'none';
+                                }
+                            });
+
+                            // 侧边栏切换
+                            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                                document.querySelector('.sidebar').classList.toggle('collapsed');
+                                document.querySelector('.main-content').classList.toggle('expanded');
+                            });
+
+                            // 退出登录
+                            document.getElementById('logoutBtn').addEventListener('click', function() {
+                                if (confirm('确定要退出登录吗？')) {
+                                    localStorage.removeItem('currentUser');
+                                    window.location.href = 'index.html';
+                                }
+                            });
+                        });
+
+                        // 加载学生数据
+                        function loadStudentData(studentId) {
+                            const studentData = {
+                                id: studentId,
+                                name: '张三',
+                                gender: '男',
+                                age: 20,
+                                grade: '大二',
+                                major: '计算机科学与技术',
+                                email: 'zhangsan@example.com',
+                                enrollDate: '2022-09-01',
+                                status: '在读'
+                            };
+
+                            // 填充页面数据
+                            document.getElementById('studentName').innerText = studentData.name;
+                            document.getElementById('studentInitial').innerText = studentData.name.charAt(0);
+                            document.getElementById('studentIdDisplay').innerText = studentData.id;
+                            document.getElementById('studentGradeMajor').innerText = `${studentData.grade} / ${studentData.major}`;
+                            document.getElementById('studentGender').innerText = studentData.gender;
+                            document.getElementById('studentAge').innerText = studentData.age;
+                            document.getElementById('studentEmail').innerText = studentData.email;
+                            document.getElementById('studentEnrollDate').innerText = studentData.enrollDate;
+                        }
+
+                        // 加载课程选项
+                        function loadCourseOptions() {
+                            const courseSelect = document.getElementById('course');
+                            courseSelect.innerHTML = '<option value="">请选择课程</option>';
+
+                            // 模拟课程数据
+                            const courses = [
+                                '高等数学', '大学英语', '程序设计基础', '线性代数',
+                                '数据结构', '操作系统', '计算机网络', '编译原理',
+                                '软件工程', '数据库系统', '人工智能导论', '机器学习'
+                            ];
+
+                            courses.forEach(course => {
+                                const option = document.createElement('option');
+                                option.value = course;
+                                option.innerText = course;
+                                courseSelect.appendChild(option);
+                            });
+                        }
+
+                        // 验证表单
+                        function validateEditForm() {
+                            let valid = true;
+                            const nameInput = document.getElementById('editName');
+                            const ageInput = document.getElementById('editAge');
+                            const emailInput = document.getElementById('editEmail');
+
+                            // 重置错误消息
+                            document.getElementById('editName-error').textContent = '';
+                            document.getElementById('editAge-error').textContent = '';
+                            document.getElementById('editEmail-error').textContent = '';
+
+                            // 名字验证
+                            if (!nameInput.value.trim()) {
+                                document.getElementById('editName-error').textContent = '姓名不能为空';
+                                valid = false;
+                            }
+
+                            // 年龄验证
+                            const age = parseInt(ageInput.value);
+                            if (isNaN(age) || age < 16 || age > 50) {
+                                document.getElementById('editAge-error').textContent = '请输入有效年龄(16-50)';
+                                valid = false;
+                            }
+
+                            // 邮箱验证
+                            if (emailInput.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+                                document.getElementById('editEmail-error').textContent = '请输入有效的邮箱地址';
+                                valid = false;
+                            }
+
+                            return valid;
+                        }
+
+                        function validateGradeForm() {
+                            let valid = true;
+                            const semesterSelect = document.getElementById('semester');
+                            const courseSelect = document.getElementById('course');
+                            const scoreInput = document.getElementById('score');
+
+                            // 重置错误消息
+                            document.getElementById('semester-error').textContent = '';
+                            document.getElementById('course-error').textContent = '';
+                            document.getElementById('score-error').textContent = '';
+
+                            if (!semesterSelect.value) {
+                                document.getElementById('semester-error').textContent = '请选择学期';
+                                valid = false;
+                            }
+
+                            if (!courseSelect.value) {
+                                document.getElementById('course-error').textContent = '请选择课程';
+                                valid = false;
+                            }
+
+                            const score = parseInt(scoreInput.value);
+                            if (isNaN(score) || score < 0 || score > 100) {
+                                document.getElementById('score-error').textContent = '请输入有效成绩(0-100)';
+                                valid = false;
+                            }
+
+                            return valid;
+                        }
+
+                        function validateCertForm() {
+                            let valid = true;
+                            const certNameInput = document.getElementById('certName');
+                            const certNumberInput = document.getElementById('certNumber');
+                            const issueDateInput = document.getElementById('issueDate');
+
+                            // 重置错误消息
+                            document.getElementById('certName-error').textContent = '';
+                            document.getElementById('certNumber-error').textContent = '';
+                            document.getElementById('issueDate-error').textContent = '';
+
+                            if (!certNameInput.value.trim()) {
+                                document.getElementById('certName-error').textContent = '证书名称不能为空';
+                                valid = false;
+                            }
+
+                            if (!certNumberInput.value.trim()) {
+                                document.getElementById('certNumber-error').textContent = '证书编号不能为空';
+                                valid = false;
+                            }
+
+                            if (!issueDateInput.value) {
+                                document.getElementById('issueDate-error').textContent = '请选择颁发日期';
+                                valid = false;
+                            }
+
+                            return valid;
+                        }
+
+                        // 创建学期卡片
+                        function createSemesterCard(semesterText) {
+                            const card = document.createElement('div');
+                            card.className = 'grade-card';
+                            card.innerHTML = `
+                                <div class="grade-header">
+                                    <div class="semester">${semesterText}</div>
+                                    <div class="score-average">学期均分：-</div>
+                                </div>
+                                <div class="course-list"></div>
+                            `;
+                            return card;
+                        }
+
+                        // 创建课程项
+                        function createCourseItem(courseName, score) {
+                            const courseItem = document.createElement('div');
+                            courseItem.className = 'course-item';
+
+                            // 确定成绩等级
+                            let scoreClass = 'score-fail';
+                            if (score >= 90) scoreClass = 'score-excellent';
+                            else if (score >= 80) scoreClass = 'score-good';
+                            else if (score >= 60) scoreClass = 'score-average';
+
+                            courseItem.innerHTML = `
+                                <div class="course-title">${courseName}</div>
+                                <div class="course-info">
+                                    <div class="course-credit">3学分 | 必修</div>
+                                    <div class="course-score ${scoreClass}">${score}</div>
+                                </div>
+                            `;
+                            return courseItem;
+                        }
+
+                        // 创建证书项
+                        function createCertificateItem(name, number, date) {
+                            const certItem = document.createElement('div');
+                            certItem.className = 'certificate-item';
+
+                            const formattedDate = new Date(date).toISOString().split('T')[0];
+
+                            certItem.innerHTML = `
+                                <div class="cert-icon">
+                                    <span style="font-size: 1.5rem;">🏆</span>
+                                </div>
+                                <div class="cert-info">
+                                    <div class="cert-title">${name}</div>
+                                    <div class="cert-meta">
+                                        <div class="cert-meta-item">证书编号: ${number}</div>
+                                        <div class="cert-meta-item">获得时间: ${formattedDate}</div>
+                                    </div>
+                                </div>
+                                <div class="cert-actions">
+                                    <span class="file-link">查看证书</span>
+                                </div>
+                            `;
+                            return certItem;
+                        }
+
+                        // 获取学期显示文本
+                        function getSemesterDisplay(semesterCode) {
+                            const parts = semesterCode.split('-');
+                            return `${parts[0]}-${parts[1]} 第${parts[2] === '1' ? '一' : '二'}学期`;
+                        }
+
+                        // 显示提示消息
+                        function showToast(message, type = 'info') {
+                            const toast = document.createElement('div');
+                            toast.className = `toast toast-${type}`;
+                            toast.innerText = message;
+                            document.body.appendChild(toast);
+
+                            setTimeout(() => {
+                                toast.classList.add('show');
+                            }, 10);
+
+                            setTimeout(() => {
+                                toast.classList.remove('show');
+                                setTimeout(() => {
+                                    document.body.removeChild(toast);
+                                }, 300);
+                            }, 3000);
+                        }
+                    </script>
+                </body>
+                </html>

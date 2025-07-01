@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 课程管理</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <script src="javascript/common.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" />
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+        </div>
+
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>课程管理</h1>
+                    <p>管理课程信息，查看课程安排</p>
+                </div>
+
+                <div class="top-actions">
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+            </div>
+
+
+            <!-- 内容区域 -->
+            <div class="content-container">
+                <!-- 搜索和过滤区域 -->
+                <div class="filter-section">
+                    <div class="search-filters">
+                        <div class="form-group">
+                            <input type="text" id="courseId" placeholder="课程编号">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="courseName" placeholder="课程名称">
+                        </div>
+                        <div class="form-group">
+                            <select id="courseType">
+                                <option value="">课程类型</option>
+                                <option value="必修">必修</option>
+                                <option value="选修">选修</option>
+                                <option value="公共基础">公共基础</option>
+                                <option value="专业核心">专业核心</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select id="courseCredit">
+                                <option value="">学分</option>
+                                <option value="1">1学分</option>
+                                <option value="2">2学分</option>
+                                <option value="3">3学分</option>
+                                <option value="4">4学分</option>
+                                <option value="5">5学分</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" id="searchBtn">搜索</button>
+                        <button class="btn btn-outline" id="resetBtn">重置</button>
+                        <button class="btn btn-success" id="addCourseBtn">添加课程</button>
+                    </div>
+                </div>
+
+                <!-- 数据表格区域 -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>课程编号</th>
+                                <th>课程名称</th>
+                                <th>课程类型</th>
+                                <th>学分</th>
+                                <th>任课教师</th>
+                                <th>开课学期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courseTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <button data-page="prev" class="page-btn">&lt;</button>
+                    <div id="pageInfo" class="page-info">第 <span id="currentPage">1</span>/<span id="totalPages">1</span> 页</div>
+                    <button data-page="next" class="page-btn">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑课程模态框 -->
+    <div class="modal" id="courseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加课程</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="courseForm">
+                    <input type="hidden" id="editCourseId">
+                    <div class="form-group">
+                        <label for="formCourseId">课程编号*</label>
+                        <input type="text" id="formCourseId" required>
+                        <span class="error-message" id="formCourseId-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formCourseName">课程名称*</label>
+                        <input type="text" id="formCourseName" required>
+                        <span class="error-message" id="formCourseName-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formCourseType">课程类型*</label>
+                        <select id="formCourseType" required>
+                            <option value="必修">必修</option>
+                            <option value="选修">选修</option>
+                            <option value="公共基础">公共基础</option>
+                            <option value="专业核心">专业核心</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formCredit">学分*</label>
+                        <select id="formCredit" required>
+                            <option value="1">1学分</option>
+                            <option value="2">2学分</option>
+                            <option value="3">3学分</option>
+                            <option value="4">4学分</option>
+                            <option value="5">5学分</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formTeacher">任课教师*</label>
+                        <input type="text" id="formTeacher" required>
+                        <span class="error-message" id="formTeacher-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formSemester">开课学期*</label>
+                        <select id="formSemester" required>
+                            <option value="2023-2024-1">2023-2024学年第一学期</option>
+                            <option value="2023-2024-2">2023-2024学年第二学期</option>
+                            <option value="2024-2025-1">2024-2025学年第一学期</option>
+                            <option value="2024-2025-2">2024-2025学年第二学期</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="formDescription">课程描述</label>
+                        <textarea id="formDescription" rows="4"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveCourseBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>确认删除</h2>
+                <button class="modal-close" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除课程 <span id="deleteCourseId"></span> - <span id="deleteCourseName"></span> 吗？</p>
+                <p class="warning-text">此操作不可逆，请谨慎操作！</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="javascript/course-management.js"></script>
+    <script>
+        // 数据库配置相关
+        let dbConfig = {
+            host: 'localhost',
+            port: 3306,
+            user: 'root',
+            password: 'root',
+            database: 'mydata'
+        };
+
+        let courses = [];
+        let filteredCourses = [];
+
+
+        // 加载数据库配置
+        function loadDbConfig() {
+            const savedConfig = localStorage.getItem('dbConfig');
+            if (savedConfig) {
+                dbConfig = JSON.parse(savedConfig);
+                document.getElementById('dbHost').value = dbConfig.host;
+                document.getElementById('dbPort').value = dbConfig.port;
+                document.getElementById('dbUser').value = dbConfig.user;
+                document.getElementById('dbPassword').value = dbConfig.password;
+                document.getElementById('dbName').value = dbConfig.database;
+            }
+        }
+
+        function editCourse(courseId) {
+            // 根据ID查找课程对象
+            const course = courses.find(c => c.id == courseId);
+
+            if (!course) {
+                console.error('未找到课程:', courseId);
+                return;
+            }
+
+            console.log('正在编辑课程:', course);
+
+            // 设置模态窗口标题
+            document.getElementById('modalTitle').textContent = '编辑课程';
+
+            // 填充表单数据，处理可能的字段名差异
+            document.getElementById('formCourseId').value = course.id || course.courseId || '';
+            document.getElementById('formCourseName').value = course.name || course.courseName || '';
+            document.getElementById('formCourseType').value = course.type || course.courseType || '';
+            document.getElementById('formCredit').value = course.credit || '';
+            document.getElementById('formTeacher').value = course.teacher_id || course.teacher || '';
+            document.getElementById('formSemester').value = course.semester || '';
+            document.getElementById('formDescription').value = course.description || '';
+
+            // 存储当前编辑的课程ID
+            document.getElementById('editCourseId').value = course.id || course.courseId;
+
+            // 显示模态窗口
+            document.getElementById('courseModal').style.display = 'flex';
+        }
+
+        // 保存数据库配置
+        function saveDbConfig() {
+            dbConfig = {
+                host: document.getElementById('dbHost').value.trim(),
+                port: parseInt(document.getElementById('dbPort').value.trim()),
+                user: document.getElementById('dbUser').value.trim(),
+                password: document.getElementById('dbPassword').value.trim(),
+                database: document.getElementById('dbName').value.trim()
+            };
+
+            localStorage.setItem('dbConfig', JSON.stringify(dbConfig));
+            return dbConfig;
+        }
+
+        // 测试数据库连接
+        async function testDbConnection(config) {
+            try {
+                const response = await fetch('http://localhost:3000/api/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('测试连接失败:', error);
+                return { success: false, message: '连接服务器失败: ' + error.message };
+            }
+        }
+
+        testDbConnection(dbConfig);
+
+        // 同步数据到MySQL数据库
+        async function syncDataToDb() {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = '<div class="sync-log info">开始同步数据...</div>';
+
+            const options = {
+                syncStudents: document.getElementById('syncStudents').checked,
+                syncTeachers: document.getElementById('syncTeachers').checked,
+                syncCourses: document.getElementById('syncCourses').checked,
+                syncGrades: document.getElementById('syncGrades').checked,
+                syncCertificates: document.getElementById('syncCertificates').checked,
+                clearExistingData: document.getElementById('clearExistingData').checked
+            };
+
+            // 获取所有要同步的数据
+            const data = {};
+            if (options.syncStudents) {
+                data.students = JSON.parse(localStorage.getItem('students') || '[]');
+                logSync(syncStatus, '已加载学生数据: ' + data.students.length + '条记录');
+            }
+
+            if (options.syncTeachers) {
+                data.teachers = JSON.parse(localStorage.getItem('teachers') || '[]');
+                logSync(syncStatus, '已加载教师数据: ' + data.teachers.length + '条记录');
+            }
+
+            if (options.syncCourses) {
+                data.courses = JSON.parse(localStorage.getItem('courses') || '[]');
+                logSync(syncStatus, '已加载课程数据: ' + data.courses.length + '条记录');
+            }
+
+            if (options.syncGrades) {
+                data.grades = JSON.parse(localStorage.getItem('grades') || '[]');
+                logSync(syncStatus, '已加载成绩数据: ' + data.grades.length + '条记录');
+            }
+
+            if (options.syncCertificates) {
+                data.certificates = JSON.parse(localStorage.getItem('certificates') || '[]');
+                logSync(syncStatus, '已加载证书数据: ' + data.certificates.length + '条记录');
+            }
+
+            // 将数据发送到后端
+            try {
+                logSync(syncStatus, '正在连接服务器...');
+
+                const response = await fetch('http://localhost:3000/api/sync-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        config: dbConfig,
+                        options: options,
+                        data: data
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    logSync(syncStatus, '数据同步成功!', 'success');
+
+                    // 显示详细结果
+                    if (result.details) {
+                        Object.keys(result.details).forEach(table => {
+                            logSync(syncStatus, `${table}: ${result.details[table].inserted}条记录已插入`, 'success');
+                        });
+                    }
+                } else {
+                    logSync(syncStatus, '同步失败: ' + result.message, 'error');
+                    if (result.details) {
+                        logSync(syncStatus, '错误详情: ' + JSON.stringify(result.details), 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('同步数据失败:', error);
+                logSync(syncStatus, '同步失败: ' + error.message, 'error');
+            }
+        }
+
+        // 记录同步日志
+        function logSync(container, message, type = 'info') {
+            const logElement = document.createElement('div');
+            logElement.className = `sync-log ${type}`;
+            logElement.textContent = message;
+            container.appendChild(logElement);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 初始化数据库同步模态框
+        function initSyncDbModal() {
+            document.getElementById('syncStatus').innerHTML = '';
+            document.getElementById('clearExistingData').checked = false;
+
+            // 默认选中所有数据类型
+            document.getElementById('syncStudents').checked = true;
+            document.getElementById('syncTeachers').checked = true;
+            document.getElementById('syncCourses').checked = true;
+            document.getElementById('syncGrades').checked = true;
+            document.getElementById('syncCertificates').checked = true;
+        }
+
+
+        // 搜索和过滤功能
+        document.getElementById('searchBtn').addEventListener('click', function() {
+            searchCourses();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('courseId').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseType').value = '';
+            document.getElementById('courseCredit').value = '';
+            searchCourses();
+        });
+
+        function searchCourses() {
+            const courseId = document.getElementById('courseId').value.trim().toLowerCase();
+            const courseName = document.getElementById('courseName').value.trim().toLowerCase();
+            const courseType = document.getElementById('courseType').value.trim().toLowerCase();
+            const courseCredit = document.getElementById('courseCredit').value.trim().toLowerCase();
+
+            const teachers = JSON.parse(localStorage.getItem('teachers') || '[]');
+
+            filteredCourses = courses.filter(course => {
+                // 处理课程类型可能的字段差异
+                const matchType = !courseType ||
+                    (course.type && course.type.toLowerCase().includes(courseType)) ||
+                    (course.courseType && course.courseType.toLowerCase().includes(courseType));
+
+                // 处理课程名称可能的字段差异
+                const courseTitleField = course.name || course.courseName || '';
+
+                return (!courseId || String(course.id).toLowerCase().includes(courseId)) &&
+                    (!courseName || courseTitleField.toLowerCase().includes(courseName)) &&
+                    matchType &&
+                    (!courseCredit || String(course.credit).includes(courseCredit));
+            });
+
+            // 关联教师姓名
+            filteredCourses = filteredCourses.map(course => {
+                const teacherId = course.teacher_id || course.teacher;
+                const teacher = teachers.find(t => String(t.id) === String(teacherId));
+                return {
+                    ...course,
+                    teacherName: teacher ? teacher.name : '未分配'
+                };
+            });
+
+            renderCourseTable();
+        }
+
+        function resetCourses() {
+            document.getElementById('courseId').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseType').value = '';
+            document.getElementById('courseCredit').value = '';
+
+            const teachers = JSON.parse(localStorage.getItem('teachers') || '[]');
+
+            filteredCourses = courses.map(course => {
+                const teacherId = course.teacher_id || course.teacher;
+                const teacher = teachers.find(t => String(t.id) === String(teacherId));
+                return {
+                    ...course,
+                    teacherName: teacher ? teacher.name : '未分配'
+                };
+            });
+
+            renderCourseTable();
+        }
+
+
+  function renderCourseTable() {
+  const teachers = JSON.parse(localStorage.getItem('teachers') || '[]');
+
+  // 在渲染前处理数据，关联教师姓名
+  const coursesToRender = (filteredCourses || courses).map(course => {
+    const teacherId = course.teacher_id || course.teacher;
+    const teacher = teachers.find(t => String(t.id) === String(teacherId));
+    return {
+      ...course,
+      teacherName: teacher ? teacher.name : '未分配'
+    };
+  });
+
+  // 使用处理后的数据渲染
+  renderCourses(coursesToRender);
+}
+        function renderCourses(courses) {
+            const courseTableBody = document.getElementById('courseTableBody');
+            // 添加null检查
+            if (!courseTableBody) {
+                console.error('找不到courseTableBody元素');
+                return;
+            }
+
+            courseTableBody.innerHTML = '';
+
+            if (courses.length === 0) {
+                courseTableBody.innerHTML = '<tr><td colspan="7" class="no-data">未找到匹配的课程信息</td></tr>';
+                return;
+            }
+
+            // 获取教师数据用于关联
+            const teachers = JSON.parse(localStorage.getItem('teachers') || '[]');
+            console.log('可用教师数据:', teachers.length, '条');
+
+
+            courses.forEach(course => {
+                // 查找教师姓名
+                let teacherName = '未分配';
+                const teacherId = course.teacher_id || course.teacher;
+
+                if (teacherId) {
+                    const teacher = teachers.find(t => String(t.id) === String(teacherId));
+                    if (teacher) {
+                        teacherName = teacher.name;
+                    } else {
+                        teacherName = `${teacherId}(未知)`;
+                    }
+                }
+
+                let courseTypeValue = '未知类型';
+                if (course.type) {
+                    courseTypeValue = course.type;
+                } else if (course.courseType) {
+                    courseTypeValue = course.courseType;
+                }
+
+                const safeData = {
+                    courseId: String(course.courseId || course.id || ''),
+                    courseName: String(course.courseName || course.name || '未知课程'),
+                    courseType: String(course.courseType || course.type || '未知类型'),
+                    credit: Number(course.credit || course.credits || course.courseCredit || 0),
+                    teacher: teacherName || '未分配',
+                    semester: String(course.semester || course.term || course.semesterCode || '')
+                };
+
+                console.log('原始课程数据:', course);
+                console.log('处理后数据:', safeData);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${safeData.courseId}</td>
+                    <td>${safeData.courseName}</td>
+                    <td>${safeData.courseType}</td>
+                    <td>${safeData.credit}</td>
+                    <td>${safeData.teacher}</td>
+                    <td>${getSemesterDisplay(safeData.semester)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editCourse('${course.id || course.courseId}')">编辑</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteCourse('${course.id || course.courseId}')">删除</button>
+                    </td>
+                `;
+                courseTableBody.appendChild(row);
+            });
+        }
+
+        function resetCourseData() {
+            // 默认课程数据
+            const defaultCourses = [
+                {
+                    id: "CS101",
+                    courseId: "CS101",
+                    courseName: "计算机导论",
+                    courseType: "必修",
+                    credit: 3,
+                    teacher: "汤进",
+                    semester: "2023-2024-1",
+                    description: "计算机科学与技术基础入门课程"
+                },
+                {
+                    id: "CS201",
+                    courseId: "CS201",
+                    courseName: "数据结构",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "吕皖丽",
+                    semester: "2023-2024-1",
+                    description: "介绍基本数据结构和算法分析"
+                },
+                {
+                    id: "CS301",
+                    courseId: "CS301",
+                    courseName: "数据库系统",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "琚川徽",
+                    semester: "2023-2024-2",
+                    description: "数据库设计、实现与管理"
+                },
+                {
+                    id: "MA101",
+                    courseId: "MA101",
+                    courseName: "高等数学",
+                    courseType: "公共基础",
+                    credit: 5,
+                    teacher: "韩冰",
+                    semester: "2023-2024-1",
+                    description: "微积分、线性代数基础"
+                },
+                {
+                    id: "EN201",
+                    courseId: "EN201",
+                    courseName: "专业英语",
+                    courseType: "选修",
+                    credit: 2,
+                    teacher: "李静",
+                    semester: "2023-2024-2",
+                    description: "计算机专业英语阅读与写作"
+                }
+            ];
+
+            // 强制覆盖本地存储的课程数据
+            localStorage.setItem('courses', JSON.stringify(defaultCourses));
+            console.log('课程数据已重置');
+
+            // 重新渲染课程表格
+            renderCourses(defaultCourses);
+
+            return defaultCourses;
+        }
+
+        // 初始化默认课程数据
+        function initializeDefaultCourses() {
+            // 从本地存储中获取现有课程
+            const existingCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+
+            // 如果已有课程数据，则不重复添加
+            if (existingCourses.length > 0) {
+                return;
+            }
+
+            // 默认课程数据
+            const defaultCourses = [
+                {
+                    id: "CS101",
+                    courseId: "CS101",
+                    courseName: "计算机导论",
+                    courseType: "必修",
+                    credit: 3,
+                    teacher: "汤进",
+                    semester: "2023-2024-1",
+                    description: "计算机科学与技术基础入门课程"
+                },
+                {
+                    id: "CS201",
+                    courseId: "CS201",
+                    courseName: "数据结构",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "吕皖丽",
+                    semester: "2023-2024-1",
+                    description: "介绍基本数据结构和算法分析"
+                },
+                {
+                    id: "CS301",
+                    courseId: "CS301",
+                    courseName: "数据库系统",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "琚川徽",
+                    semester: "2023-2024-2",
+                    description: "数据库设计、实现与管理"
+                },
+                {
+                    id: "MA101",
+                    courseId: "MA101",
+                    courseName: "高等数学",
+                    courseType: "公共基础",
+                    credit: 5,
+                    teacher: "韩冰",
+                    semester: "2023-2024-1",
+                    description: "微积分、线性代数基础"
+                },
+                {
+                    id: "EN201",
+                    courseId: "EN201",
+                    courseName: "专业英语",
+                    courseType: "选修",
+                    credit: 2,
+                    teacher: "李静",
+                    semester: "2023-2024-2",
+                    description: "计算机专业英语阅读与写作"
+                }
+            ];
+
+            // 保存到本地存储
+            localStorage.setItem('courses', JSON.stringify(defaultCourses));
+            console.log('默认课程数据已初始化');
+
+            // 刷新显示
+            if (typeof loadCourses === 'function') {
+                loadCourses();
+            }
+        }
+
+        async function loadCourses() {
+            const courseTableBody = document.getElementById('courseTableBody');
+            courseTableBody.innerHTML = '<tr><td colspan="7" class="loading-text">加载中...</td></tr>';
+
+            try {
+                // 从服务器获取课程数据
+                const response = await fetch('http://localhost:3000/api/courses');
+                if (!response.ok) {
+                    throw new Error(`服务器响应错误: ${response.status}`);
+                }
+
+                courses = await response.json();
+                courses = courses.map(course => ({
+                    id: course.id || course.courseId,
+                    courseId: course.id || course.courseId,
+                    name: course.name || course.courseName,
+                    courseName: course.name || course.courseName,
+                    type: course.type || course.courseType,
+                    courseType: course.type || course.courseType,
+                    credit: course.credit || 0,
+                    teacher: course.teacher_id || course.teacher || '',
+                    semester: course.semester || '',
+                }));
+
+                console.log('从服务器获取的课程数据:', courses);
+
+                if (Array.isArray(courses) && courses.length > 0) {
+                    // 保存到localStorage作为缓存
+                    localStorage.setItem('courses', JSON.stringify(courses));
+                    renderCourses(courses);
+                } else {
+                    // 服务器返回空数组，尝试使用本地数据
+                    fallbackToLocalData();
+                }
+                filteredCourses = [...courses];
+            } catch (error) {
+                console.error('从服务器获取课程失败:', error);
+                fallbackToLocalData();
+                filteredCourses = [...courses];
+            }
+        }
+
+
+        function fallbackToLocalData() {
+            courses = JSON.parse(localStorage.getItem('courses') || '[]');
+            if (courses.length === 0) {
+                courses = resetCourseData();
+            }
+            renderCourses(courses);
+        }
+
+        window.onload = async function() {
+            try {
+                // 检查本地存储中是否有课程数据
+                const storedCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+                if (storedCourses.length === 0) {
+                    // 如果没有，则初始化默认数据
+                    initializeDefaultCourses();
+                }
+                // 尝试从服务器加载最新数据
+                await loadCourses();
+            } catch (error) {
+                console.error('页面加载时出错:', error);
+                // 确保显示默认数据
+                initializeDefaultCourses();
+                renderCourses(JSON.parse(localStorage.getItem('courses') || '[]'));
+            }
+        };
+
+        // 将前端默认数据同步到数据库
+        async function syncDefaultCoursesToDb() {
+            // 获取默认课程数据
+            const defaultCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+
+            if (defaultCourses.length === 0) {
+                initializeDefaultCourses(); // 确保有默认数据
+            }
+
+            // 发送到服务器进行批量插入
+            try {
+                const response = await fetch('http://localhost:3000/api/sync-courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courses: JSON.parse(localStorage.getItem('courses')) })
+                });
+
+                if (response.ok) {
+                    console.log('成功将默认课程数据同步到数据库');
+                    return true;
+                }
+            } catch (error) {
+                console.error('同步数据失败:', error);
+            }
+            return false;
+        }
+
+
+      async function saveCourse(course, isNew = false) {
+    try {
+        console.log('准备保存课程:', course, '是否为新课程:', isNew);
+
+        // 确保字段名称与服务器端期望的一致
+        const courseData = {
+            id: course.id,
+            courseName: course.courseName,
+            type: course.courseType,
+            semester: course.semester,
+            credit: parseInt(course.credit) || 0,
+            teacher: course.teacher  // 教师ID
+        };
+
+        console.log('发送到服务器的数据:', courseData);
+
+        const method = isNew ? 'POST' : 'PUT';
+        const url = isNew
+            ? 'http://localhost:3000/api/courses'
+            : `http://localhost:3000/api/courses/${course.id}`;
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(courseData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`服务器响应错误(${response.status}): ${errorText}`);
+        }
+
+        // 更新本地数据
+        await loadCourses();
+        return true;
+    } catch (error) {
+        console.error('保存课程失败:', error);
+        alert('保存失败: ' + error.message);
+        return false;
+    }
+}
+        // 删除课程
+        async function deleteCourseFromServer(courseId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/courses/${courseId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`删除失败: ${errorData.error || '未知错误'}`);
+                }
+
+                // 更新内存中的数据
+                courses = courses.filter(course => course.id !== courseId);
+                filteredCourses = filteredCourses.filter(course => course.id !== courseId);
+
+                // 更新本地存储
+                localStorage.setItem('courses', JSON.stringify(courses));
+
+                // 关闭确认对话框
+                document.getElementById('confirmModal').style.display = 'none';
+
+                // 刷新表格
+                renderCourses(courses);
+
+                // 显示成功通知
+                showNotification('课程已删除', 'success');
+            } catch (error) {
+                console.error('删除课程失败:', error);
+                showNotification(`删除课程失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 添加学期显示转换函数
+        function getSemesterDisplay(semesterCode) {
+            if (!semesterCode) return '未设置';
+
+            const semesterMap = {
+                '2023-2024-1': '2023-2024学年第一学期',
+                '2023-2024-2': '2023-2024学年第二学期',
+                '2024-2025-1': '2024-2025学年第一学期',
+                '2024-2025-2': '2024-2025学年第二学期'
+            };
+
+            return semesterMap[semesterCode] || semesterCode;
+        }
+
+
+        // 删除课程函数
+        async function deleteCourse(courseId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/courses/${courseId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`删除失败: ${errorData.error || '未知错误'}`);
+                }
+
+                // 从本地数组中移除课程
+                courses = courses.filter(course => course.id !== courseId);
+
+                // 更新本地存储
+                localStorage.setItem('courses', JSON.stringify(courses));
+
+                // 关闭确认对话框
+                document.getElementById('confirmModal').style.display = 'none';
+
+                // 重新渲染表格
+                renderCourses(courses);
+
+                // 显示成功消息
+                alert('课程已成功删除');
+            } catch (error) {
+                console.error('删除课程失败:', error);
+                alert(`删除课程失败: ${error.message}`);
+            }
+        }
+
+        // 设置取消和关闭按钮事件
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+
+        document.getElementById('closeConfirmModal').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+
+        // 导入数据功能
+        function importDataFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('请选择一个 JSON 文件！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // 解析 JSON 数据
+                    const data = JSON.parse(e.target.result);
+
+                    // 验证数据结构
+                    if (data.students && data.teachers && data.admins && data.courses && data.grades && data.certificates && data.users) {
+                        // 将数据存入 localStorage
+                        localStorage.setItem('students', JSON.stringify(data.students));
+                        localStorage.setItem('teachers', JSON.stringify(data.teachers));
+                        localStorage.setItem('admins', JSON.stringify(data.admins));
+                        localStorage.setItem('courses', JSON.stringify(data.courses));
+                        localStorage.setItem('grades', JSON.stringify(data.grades));
+                        localStorage.setItem('certificates', JSON.stringify(data.certificates));
+                        localStorage.setItem('users', JSON.stringify(data.users));
+
+                        // 如果包含当前用户信息，则更新
+                        if (data.currentUser) {
+                            localStorage.setItem('currentUser', JSON.stringify(data.currentUser));
+                        }
+
+                        alert('数据导入成功！请刷新页面以查看更新。');
+                    } else {
+                        alert('文件格式不正确，请检查 JSON 数据结构！');
+                    }
+                } catch (error) {
+                    alert('导入失败：文件内容无效或解析错误！');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+
+        // 侧边栏切换
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('expanded');
+
+            // 根据侧边栏状态切换图标方向
+            const icon = this.querySelector('i');
+            if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                icon.classList.remove('fa-angle-left');
+                icon.classList.add('fa-angle-right');
+            } else {
+                icon.classList.remove('fa-angle-right');
+                icon.classList.add('fa-angle-left');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 直接测试数据库连接并加载数据
+            testDbConnection(dbConfig).then(result => {
+                console.log('数据库连接测试结果:', result);
+                if(result.success) {
+                    loadCourses();
+                } else {
+                    // 如果连接失败，尝试从本地存储加载数据
+                    const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+                    if (courses.length === 0) {
+                        // 如果本地存储也没有数据，则初始化默认数据
+                        initializeDefaultCourses();
+                        renderCourses(JSON.parse(localStorage.getItem('courses') || '[]'));
+                    } else {
+                        renderCourses(courses);
+                    }
+                }
+            }).catch(error => {
+                console.error('数据库连接测试失败:', error);
+                // 连接测试出错，使用本地数据
+                const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+                if (courses.length === 0) {
+                    initializeDefaultCourses();
+                }
+                renderCourses(JSON.parse(localStorage.getItem('courses') || '[]'));
+            });
+
+        // 绑定导入按钮事件
+        document.getElementById('importDataBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // 绑定文件输入事件
+        document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+
+
+        // 获取URL参数，检查是否需要重置数据
+        const urlParams = new URLSearchParams(window.location.search);
+        const resetData = urlParams.get('reset');
+
+        if (resetData === 'true') {
+            // 重置课程数据
+            resetCourseData();
+            // 移除URL参数
+            window.history.replaceState({}, document.title, 'course-management.html');
+        } else {
+            // 正常加载课程
+            const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+            renderCourses(courses);
+        }
+
+        try {
+            initializeDefaultCourses();
+
+            const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+            renderCourses(courses);
+
+            // 记录调试信息
+            console.log('页面初始化完成，课程数据已加载', courses);
+
+            // 设置图标
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            importIcon.className = 'icon';
+            importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            exportIcon.className = 'icon';
+            exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            logoutIcon.className = 'icon';
+            logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+            // 获取当前用户信息
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+            if (!currentUser.username) {
+                // 如果未登录，跳转到登录页
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            const userRole = currentUser.role || 'student';
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+            // 设置用户头像
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+            // 加载课程数据
+            await loadCourses();
+
+            // 确保courses变量有值
+            if (!courses || courses.length === 0) {
+                const localCourses = JSON.parse(localStorage.getItem('courses') || '[]');
+                courses.splice(0, courses.length, ...localCourses);
+            }
+            console.log('已加载课程数据:', courses.length + '条记录');
+
+        } catch(error) {
+            console.error('初始化过程出错:', error);
+            loadCourses();
+        }
+
+        // 模态框关闭按钮事件处理
+        document.querySelector('.modal-close').addEventListener('click', function() {
+            document.getElementById('courseModal').style.display = 'none';
+        });
+
+        // 取消按钮事件处理
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            document.getElementById('courseModal').style.display = 'none';
+        });
+
+        document.getElementById('saveCourseBtn').addEventListener('click', async function() {
+    // 获取表单数据
+    const editId = document.getElementById('editCourseId').value;
+    const courseId = document.getElementById('formCourseId').value.trim();
+    const courseName = document.getElementById('formCourseName').value.trim();
+    const courseType = document.getElementById('formCourseType').value;
+    const credit = document.getElementById('formCredit').value;
+    const teacher = document.getElementById('formTeacher').value.trim();
+    const semester = document.getElementById('formSemester').value;
+
+    // 表单验证
+    if (!courseId || !courseName || !teacher) {
+        alert('请填写所有必填字段');
+        return;
+    }
+
+    const isNew = !editId;
+
+    const courseData = {
+        id: isNew ? courseId : editId,
+        courseName,
+        courseType,
+        credit,
+        teacher,
+        semester
+    };
+
+    console.log('保存课程数据:', courseData, '是否为新课程:', isNew);
+    const success = await saveCourse(courseData, isNew);
+
+    if (success) {
+        document.getElementById('courseModal').style.display = 'none';
+    }
+});
+
+        document.getElementById('confirmDeleteBtn').onclick = async function() {
+            const courseId = document.getElementById('deleteCourseId').textContent;
+            const success = await deleteCourseFromServer(courseId);
+
+            if (success) {
+                // 关闭弹窗
+                document.getElementById('confirmModal').style.display = 'none';
+                // 刷新表格
+                loadCourses();
+            } else {
+                alert('删除失败，请重试');
+            }
+        };
+
+        // 添加课程按钮事件
+        document.getElementById('addCourseBtn').addEventListener('click', function() {
+            // 设置模态框标题
+            document.getElementById('modalTitle').textContent = '添加课程';
+
+            // 重置表单
+            document.getElementById('courseForm').reset();
+
+            // 清除错误信息
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+            // 显示模态框
+            document.getElementById('courseModal').style.display = 'flex';
+        });
+
+        // 关闭确认模态框的事件处理
+        document.getElementById('closeConfirmModal').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+
+        // 取消删除按钮的事件处理
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+
+        // 退出登录
+        document.querySelectorAll('#logoutBtn, #logoutBtnBottom').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

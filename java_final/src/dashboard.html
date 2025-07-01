@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 控制面板</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="javascript/shared-functions.js"></script>
+</head>
+<body>
+    <div class="layout">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <h2>学业管理系统</h2>
+                </div>
+                <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                    <i class="fas fa-angle-left"></i>
+                    <span class="tooltip-text">收起/展开侧边栏</span>
+                </button>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <h4 id="userName">加载中...</h4>
+                    <p id="userRole" class="user-role">加载中...</p>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="dashboard.html">
+                        <span class="icon dashboard-icon"></span>
+                        <span class="title">首页</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="student-management.html">
+                        <span class="icon students-icon"></span>
+                        <span class="title">学生管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="course-management.html">
+                        <span class="icon courses-icon"></span>
+                        <span class="title">课程管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="grade-management.html">
+                        <span class="icon grades-icon"></span>
+                        <span class="title">成绩管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="certificate-management.html">
+                        <span class="icon certificate-icon"></span>
+                        <span class="title">证书管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="statistics.html">
+                        <span class="icon statistics-icon"></span>
+                        <span class="title">成绩统计</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button id="importDataBtn" class="import-btn">
+                    <span class="icon upload-icon"></span>
+                    <span class="title">导入数据</span>
+                </button>
+                <input type="file" id="fileInput" accept=".json" style="display: none;" />
+
+                <button id="exportDataBtn" class="export-btn">
+                    <span class="icon download-icon"></span>
+                    <span class="title">导出数据</span>
+                </button>
+
+                <button id="logoutBtn" class="logout-btn">
+                    <span class="icon logout-icon"></span>
+                    <span class="title">退出登录</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="dashboard-header">
+          <div class="header-right">
+            <div class="date-display" id="dateTimeDisplay">
+            </div>
+          </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>控制面板</h1>
+                    <p id="welcomeMessage">您好，欢迎使用学业管理系统</p>
+                </div>
+
+                <div class="top-actions">
+                    <div class="date-display" id="currentDate"></div>
+                </div>
+            </div>
+
+
+            <!-- 快速访问区域 -->
+            <div class="content-section">
+                <h2 class="section-title">快速访问</h2>
+                <div class="quick-access-items" id="quickAccessCards">
+                    <a href="student-management.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon add-student-icon"></span>
+                        <span>查看学生</span>
+                    </a>
+                    <a href="course-management.html" class="quick-item admin-menu">
+                        <span class="icon add-course-icon"></span>
+                        <span>查看课程</span>
+                    </a>
+                    <a href="certificate-management.html" class="quick-item student-menu">
+                        <span class="icon upload-cert-icon"></span>
+                        <span>查看证书</span>
+                    </a>
+                    <a href="grade-management.html" class="quick-item student-menu">
+                        <span class="icon view-grade-icon"></span>
+                        <span>查看成绩</span>
+                    </a>
+                    <a href="statistics.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon statistics-icon"></span>
+                        <span>成绩统计</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 近期通知 -->
+            <div class="recent-section">
+                <div class="recent-notices">
+                    <h2>近期通知</h2>
+                    <div class="notice-list">
+                        <div class="notice-item">
+                            <div class="notice-date">5月15日</div>
+                            <div class="notice-content">
+                                <h4>2025学年第二学期期末考试安排已发布</h4>
+                                <p>请各位同学注意查看考试时间和地点，做好复习准备。</p>
+                            </div>
+                        </div>
+                        <div class="notice-item">
+                            <div class="notice-date">5月10日</div>
+                            <div class="notice-content">
+                                <h4>四六级考试准考证发布</h4>
+                                <p>2025年6月份四六级考试准考证将于6月1日发布，请备考同学及时打印准考证信息。</p>
+                            </div>
+                        </div>
+                        <div class="notice-item">
+                            <div class="notice-date">5月5日</div>
+                            <div class="notice-content">
+                                <h4>系统维护通知</h4>
+                                <p>系统将于本周六凌晨2:00-4:00进行维护升级，请提前做好准备。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 近期课程/工作（根据角色显示） -->
+                <div class="recent-activities">
+                    <h2>本周课程安排</h2>
+                    <div class="activity-list">
+                        <div class="activity-item student-menu">
+                            <div class="activity-time">周一 08:00-09:40</div>
+                            <div class="activity-content">
+                                <h4>高等数学</h4>
+                                <p>主教楼B101 | 韩冰</p>
+                            </div>
+                        </div>
+                        <div class="activity-item student-menu">
+                            <div class="activity-time">周二 10:00-11:40</div>
+                            <div class="activity-content">
+                                <h4>数据结构</h4>
+                                <p>理西楼A305 | 吕皖丽</p>
+                            </div>
+                        </div>
+                        <div class="activity-item teacher-menu">
+                            <div class="activity-time">周三 13:30-15:10</div>
+                            <div class="activity-content">
+                                <h4>计算机导论</h4>
+                                <p>教学楼C201 | 汤进</p>
+                            </div>
+                        </div>
+                        <div class="activity-item admin-menu">
+                            <div class="activity-time">周四 09:00</div>
+                            <div class="activity-content">
+                                <h4>教务工作例会</h4>
+                                <p>行政楼302会议室</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script>
+        // 生成快速访问卡片
+        function generateQuickAccessCards() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userRole = currentUser.role || 'student';
+            const cardsContainer = document.getElementById('quickAccessCards');
+
+            if (!cardsContainer) {
+                console.error('找不到快速访问卡片容器 (id: quickAccessCards)');
+                return;
+            }
+
+            // 清空现有卡片
+            cardsContainer.innerHTML = '';
+
+            // 添加管理员和教师可见的卡片
+            if (userRole === 'admin' || userRole === 'teacher') {
+                cardsContainer.innerHTML += `
+                    <a href="student-management.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon add-student-icon"></span>
+                        <span>查看学生</span>
+                    </a>`;
+
+                cardsContainer.innerHTML += `
+                    <a href="course-management.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon add-course-icon"></span>
+                        <span>查看课程</span>
+                    </a>`;
+
+                cardsContainer.innerHTML += `<a href="certificate-management.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon upload-cert-icon"></span>
+                        <span>查看证书</span>
+                    </a>`;
+
+                cardsContainer.innerHTML += `<a href="grade-management.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon view-grade-icon"></span>
+                        <span>查看成绩</span>
+                    </a>`;
+
+                cardsContainer.innerHTML += `<a href="statistics.html" class="quick-item admin-menu teacher-menu">
+                        <span class="icon statistics-icon"></span>
+                        <span>成绩统计</span>
+                    </a>`;
+            }
+
+            // 添加学生可见的卡片
+            if (userRole === 'student') {
+                cardsContainer.innerHTML += `
+                    <a href="course-management.html" class="quick-item student-menu">
+                        <span class="icon add-course-icon"></span>
+                        <span>查看课程</span>
+                    </a>`;
+
+                cardsContainer.innerHTML += `
+                    <a href="certificate-management.html" class="quick-item student-menu">
+                        <span class="icon upload-cert-icon"></span>
+                        <span>查看证书</span>
+                    </a>`;
+            }
+        }
+
+        function loadNoticesAndActivities(userRole) {
+            // 添加活动列表处理逻辑
+            const activityItems = document.querySelectorAll('.activity-item');
+
+            // 隐藏所有活动项
+            activityItems.forEach(item => {
+                item.style.display = 'none';
+            });
+
+            // 根据用户角色显示相应的活动项
+            activityItems.forEach(item => {
+                // 如果元素包含与用户角色匹配的类，显示它
+                if (item.classList.contains(`${userRole}-menu`)) {
+                    item.style.display = 'flex';
+                }
+            });
+
+            // 如果没有活动项可显示，添加一个提示
+            const visibleActivities = document.querySelectorAll(`.activity-item.${userRole}-menu`);
+            if (visibleActivities.length === 0) {
+                const activityList = document.querySelector('.activity-list');
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'activity-item';
+                emptyItem.innerHTML = `
+              <div class="activity-content">
+                <p>本周暂无安排</p>
+              </div>
+            `;
+                activityList.appendChild(emptyItem);
+            }
+        }
+
+        // 修改导入数据功能
+        async function importDataFromJson(event) {
+          const file = event.target.files[0];
+          if (!file) {
+            alert('请选择一个 JSON 文件！');
+            return;
+          }
+
+          try {
+            const formData = new FormData();
+            formData.append('dataFile', file);
+
+            const response = await fetch('http://localhost:3000/api/import-data', {
+              method: 'POST',
+              body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              alert('数据导入成功！请刷新页面以查看更新。');
+            } else {
+              alert(`导入失败：${result.message}`);
+            }
+          } catch (error) {
+            console.error('导入数据出错:', error);
+            alert('导入失败：服务器连接错误！');
+          }
+        }
+
+        function exportDataToJson() {
+            return true;
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('expanded');
+
+            // 根据侧边栏状态切换图标方向
+            const icon = this.querySelector('i');
+            if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                icon.classList.remove('fa-angle-left');
+                icon.classList.add('fa-angle-right');
+            } else {
+                icon.classList.remove('fa-angle-right');
+                icon.classList.add('fa-angle-left');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 绑定导入按钮事件
+            document.getElementById('importDataBtn').addEventListener('click', function () {
+                document.getElementById('fileInput').click();
+            });
+            // 绑定文件输入事件
+            document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+
+            // 导出数据按钮点击事件绑定
+            document.getElementById('exportDataBtn').addEventListener('click', function () {
+                exportDataToJson();
+                showNotification('数据导出成功！', 'success');
+            });
+        });
+
+        // 初始化默认数据
+        function initDefaultData() {
+            const defaultStudents = [
+                {
+                    id: 1,
+                    name: "张三",
+                    username: "student1",
+                    password: "123456",
+                    role: "student",
+                    gender: "男",
+                    age: 20,
+                    class: "计算机科学2班",
+                    major: "计算机科学与技术",
+                    grade: "2021级"
+                },
+                {
+                    id: 2,
+                    name: "李四",
+                    username: "student2",
+                    password: "123456",
+                    role: "student",
+                    gender: "女",
+                    age: 19,
+                    class: "软件工程1班",
+                    major: "软件工程",
+                    grade: "2021级"
+                },
+                {
+                    id: 3,
+                    name: "王五",
+                    username: "student3",
+                    password: "123456",
+                    role: "student",
+                    gender: "男",
+                    age: 21,
+                    class: "人工智能3班",
+                    major: "人工智能",
+                    grade: "2021级"
+                },
+                {
+                    id: 4,
+                    name: "赵六",
+                    username: "student4",
+                    password: "123456",
+                    role: "student",
+                    gender: "女",
+                    age: 20,
+                    class: "计算机科学1班",
+                    major: "计算机科学与技术",
+                    grade: "2021级"
+                }
+            ];
+
+            // 定义默认教师数据
+            const defaultTeachers = [
+                {
+                    id: 101,
+                    name: "汤进",
+                    username: "teacher1",
+                    password: "123456",
+                    role: "teacher",
+                    gender: "男",
+                },
+                {
+                    id: 102,
+                    name: "吕皖丽",
+                    username: "teacher2",
+                    password: "123456",
+                    role: "teacher",
+                    gender: "女",
+                },
+                {
+                    id: 103,
+                    name: "琚川徽",
+                    username: "teacher3",
+                    password: "123456",
+                    role: "teacher",
+                    gender: "女",
+                },
+                {
+                    id: 104,
+                    name: "韩冰",
+                    username: "teacher4",
+                    password: "123456",
+                    role: "teacher",
+                    gender: "女",
+                },
+                {
+                    id: 105,
+                    name: "李静",
+                    username: "teacher5",
+                    password: "123456",
+                    role: "teacher",
+                    gender: "女",
+                }
+            ];
+
+            // 定义默认管理员数据
+            const defaultAdmins = [
+                {
+                    id: 201,
+                    name: "王管理",
+                    username: "admin1",
+                    password: "123456",
+                    role: "admin",
+                },
+                {
+                    id: 202,
+                    name: "刘主任",
+                    username: "admin2",
+                    password: "123456",
+                    role: "admin",
+                }
+            ];
+
+            // 定义默认课程数据
+            const defaultCourses = [
+                {
+                    id: "CS101",
+                    courseId: "CS101",
+                    courseName: "计算机导论",
+                    courseType: "必修",
+                    credit: 3,
+                    teacher: "汤进",
+                    semester: "2023-2024-1",
+                    description: "计算机科学与技术基础入门课程"
+                },
+                {
+                    id: "CS201",
+                    courseId: "CS201",
+                    courseName: "数据结构",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "吕皖丽",
+                    semester: "2023-2024-1",
+                    description: "介绍基本数据结构和算法分析"
+                },
+                {
+                    id: "CS301",
+                    courseId: "CS301",
+                    courseName: "数据库系统",
+                    courseType: "专业核心",
+                    credit: 4,
+                    teacher: "琚川徽",
+                    semester: "2023-2024-2",
+                    description: "数据库设计、实现与管理"
+                },
+                {
+                    id: "MA101",
+                    courseId: "MA101",
+                    courseName: "高等数学",
+                    courseType: "公共基础",
+                    credit: 5,
+                    teacher: "韩冰",
+                    semester: "2023-2024-1",
+                    description: "微积分、线性代数基础"
+                },
+                {
+                    id: "EN201",
+                    courseId: "EN201",
+                    courseName: "专业英语",
+                    courseType: "选修",
+                    credit: 2,
+                    teacher: "李静",
+                    semester: "2023-2024-2",
+                    description: "计算机专业英语阅读与写作"
+                }
+            ];
+
+            // 定义默认成绩数据
+            const defaultGrades = [
+                {
+                    id: 1,
+                    studentId: 1,
+                    studentName: "张三",
+                    courseId: 1,
+                    courseName: "高等数学",
+                    score: 92,
+                    term: "2021-2022学年第一学期"
+                },
+                {
+                    id: 2,
+                    studentId: 1,
+                    studentName: "张三",
+                    courseId: 2,
+                    courseName: "数据结构",
+                    score: 85,
+                    term: "2021-2022学年第一学期"
+                },
+                {
+                    id: 3,
+                    studentId: 2,
+                    studentName: "李四",
+                    courseId: 1,
+                    courseName: "高等数学",
+                    score: 78,
+                    term: "2021-2022学年第一学期"
+                },
+                {
+                    id: 4,
+                    studentId: 2,
+                    studentName: "李四",
+                    courseId: 2,
+                    courseName: "数据结构",
+                    score: 90,
+                    term: "2021-2022学年第一学期"
+                },
+                {
+                    id: 5,
+                    studentId: 3,
+                    studentName: "王五",
+                    courseId: 3,
+                    courseName: "数据库系统",
+                    score: 88,
+                    term: "2021-2022学年第二学期"
+                }
+            ];
+
+            // 定义默认证书数据
+            const defaultCertificates = [
+                {
+                    id: 1,
+                    studentId: 1,
+                    studentName: "张三",
+                    name: "英语四级",
+                    issueDate: "2022-06-20",
+                    issuer: "全国大学英语四六级考试委员会",
+                    score: 550
+                },
+                {
+                    id: 2,
+                    studentId: 2,
+                    studentName: "李四",
+                    name: "计算机二级",
+                    issueDate: "2022-04-15",
+                    issuer: "全国计算机等级考试委员会",
+                    score: 85
+                },
+                {
+                    id: 3,
+                    studentId: 1,
+                    studentName: "张三",
+                    name: "英语六级",
+                    issueDate: "2022-09-10",
+                    issuer: "全国大学英语四六级考试委员会",
+                    score: 92
+                }
+            ];
+
+            // 将数据存入localStorage
+            localStorage.setItem('students', JSON.stringify(defaultStudents));
+            localStorage.setItem('teachers', JSON.stringify(defaultTeachers));
+            localStorage.setItem('admins', JSON.stringify(defaultAdmins));
+            localStorage.setItem('courses', JSON.stringify(defaultCourses));
+            localStorage.setItem('grades', JSON.stringify(defaultGrades));
+            localStorage.setItem('certificates', JSON.stringify(defaultCertificates));
+
+            // 合并所有用户数据用于登录验证
+            const allUsers = [...defaultStudents, ...defaultTeachers, ...defaultAdmins];
+            localStorage.setItem('users', JSON.stringify(allUsers));
+
+            // 标记已初始化
+            localStorage.setItem('initialized', 'true');
+
+            console.log('系统默认数据已初始化');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            importIcon.className = 'icon';
+            importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            exportIcon.className = 'icon';
+            exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            logoutIcon.className = 'icon';
+            logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+            // 初始化默认数据
+            initDefaultData();
+
+            // 获取当前用户信息
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+            if (!currentUser.username) {
+                // 如果未登录，跳转到登录页
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            generateQuickAccessCards();
+
+
+            const userRole = currentUser.role || 'student';
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+            // 设置用户头像
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+            // 设置欢迎信息
+            document.getElementById('welcomeMessage').textContent =
+                `${roleMap[userRole]} ${currentUser.name || currentUser.username}，欢迎使用学业管理系统`;
+
+
+            function showContentByRole(role) {
+                document.querySelectorAll('.student-view, .teacher-view, .admin-view').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+                // 根据角色显示相应的内容
+                if (role === 'admin') {
+                    document.querySelectorAll('.admin-view').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                } else if (role === 'teacher') {
+                    document.querySelectorAll('.teacher-view').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                } else {
+                    document.querySelectorAll('.student-view').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                }
+                showMenusByRole(userRole);
+
+                loadNoticesAndActivities(userRole);
+
+                // 优化卡片布局
+                adjustCardLayout();
+            }
+
+            function adjustCardLayout() {
+                const visibleCards = document.querySelectorAll('.dashboard-cards .info-card[style*="display: flex"]');
+                const cardWidth = visibleCards.length <= 3 ? '30%' : '22%';
+
+                visibleCards.forEach(card => {
+                    card.style.flexBasis = cardWidth;
+                    card.style.margin = '0 1.5%';
+                });
+            }
+
+            const showMenusByRole = (role) => {
+                // 隐藏所有菜单项
+                document.querySelectorAll('.nav-menu .student-menu, .nav-menu .teacher-menu, .nav-menu .admin-menu').forEach(el => {
+                    el.style.display = 'none';
+                });
+                document.querySelectorAll('.quick-access-items .student-menu, .quick-access-items .teacher-menu, .quick-access-items .admin-menu').forEach(el => {
+                    el.style.display = 'none';
+                });
+
+
+                if (role === 'admin') {
+                    document.querySelectorAll('.nav-menu .admin-menu').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                } else if (role === 'teacher') {
+                    document.querySelectorAll('.nav-menu .teacher-menu').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                } else {
+                    document.querySelectorAll('.nav-menu .student-menu').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                }
+
+
+                if (role === 'admin') {
+                    document.querySelectorAll('.quick-access-items .admin-menu').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                } else if (role === 'teacher') {
+                    document.querySelectorAll('.quick-access-items .teacher-menu').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                } else {
+                    document.querySelectorAll('.quick-access-items .student-menu').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                }
+
+                // 调用活动列表的专门处理函数
+                loadNoticesAndActivities(role);
+            };
+
+
+            showMenusByRole(userRole);
+            showContentByRole(userRole);
+
+
+            // 设置当前日期
+            const now = new Date();
+            const options = {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'};
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+
+
+            // 退出登录
+            document.querySelectorAll('#logoutBtn, #logoutBtnBottom').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (confirm('确定要退出登录吗？')) {
+                        localStorage.removeItem('currentUser');
+                        window.location.href = 'index.html';
+                    }
+                });
+            });
+        });
+    </script>
+    </script>
+</body>
+</html>

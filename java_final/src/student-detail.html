@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 | 学生成绩档案</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/student-detail.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="javascript/shared-functions.js"></script>
+</head>
+<body>
+<div class="app-container">
+    <!-- 侧边导航 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" />
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+    </div>
+
+        <div class="main-content">
+            <div class="content-header">
+                <h1>学生成绩档案</h1>
+            </div>
+
+
+            <div class="student-profile">
+                <div class="profile-card">
+                    <div class="card-header">个人资料</div>
+                    <div class="card-content">
+                        <div class="student-header">
+                            <div id="studentAvatar" class="student-avatar">A</div>
+                            <div class="student-info">
+                                <h2 id="studentName">学生姓名</h2>
+                                <p>学号: <span id="studentId">202300001</span></p>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>基本信息</h3>
+                            <ul class="info-list">
+                                <li><strong>性别:</strong> <span id="studentGender">男</span></li>
+                                <li><strong>年龄:</strong> <span id="studentAge">20</span></li>
+                                <li><strong>年级:</strong> <span id="studentGrade">大二</span></li>
+                                <li><strong>专业:</strong> <span id="studentMajor">计算机科学</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-primary" onclick="editStudentInfo()">编辑信息</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grade-summary">
+                    <div class="card-header">成绩信息</div>
+                    <div class="card-content">
+                        <div class="info-section">
+                            <h3>成绩概览</h3>
+                            <div class="stat-grid">
+                                <div class="stat-card">
+                                    <div class="value" id="avgScore">0</div>
+                                    <div class="label">平均分</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="value" id="highestScore">0</div>
+                                    <div class="label">最高分</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="value" id="lowestScore">0</div>
+                                    <div class="label">最低分</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>成绩详情</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>课程名称</th>
+                                        <th>学期</th>
+                                        <th>分数</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gradesTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('expanded');
+
+            // 根据侧边栏状态切换图标方向
+            const icon = this.querySelector('i');
+            if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                icon.classList.remove('fa-angle-left');
+                icon.classList.add('fa-angle-right');
+            } else {
+                icon.classList.remove('fa-angle-right');
+                icon.classList.add('fa-angle-left');
+            }
+        });
+
+        let students = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置图标
+            setupIcons();
+
+            // 检查用户登录
+            checkUserLogin();
+
+            // 从URL获取学生ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('id');
+
+            if (!studentId) {
+                alert('未指定学生ID');
+                window.location.href = 'student-management.html';
+                return;
+            }
+
+            students = JSON.parse(localStorage.getItem('students') || '[]');
+            const student = students.find(s => String(s.id) === String(studentId));
+
+            if (!student) {
+                alert('未找到该学生信息');
+                window.location.href = 'student-management.html';
+                return;
+            }
+
+            // 显示学生信息
+            displayStudentInfo(student, studentId);
+
+            // 事件绑定
+            bindEvents();
+        });
+
+
+        function setupIcons() {
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            if (importIcon) {
+                importIcon.className = 'icon';
+                importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+            }
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            if (exportIcon) {
+                exportIcon.className = 'icon';
+                exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+            }
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            if (logoutIcon) {
+                logoutIcon.className = 'icon';
+                logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+            }
+        }
+
+
+        // 检查用户登录
+        function checkUserLogin() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (!currentUser.username) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[currentUser.role] || '用户';
+            document.getElementById('userAvatar').textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+        }
+
+
+        function getSemesterDisplay(semesterCode, grade) {
+            console.log('传入的学期数据:', semesterCode, grade);
+
+            if (!semesterCode && grade && grade.term) {
+                return typeof grade.term === 'string' ? grade.term : `第${grade.term}学期`;
+            }
+
+            if (!semesterCode) return '未知';
+
+            try {
+                // 控制台输出检查数据格式
+                console.log('学期数据格式:', semesterCode, typeof semesterCode);
+
+                // 处理字符串格式
+                if (typeof semesterCode === 'string' && semesterCode.trim() !== '') {
+                    // 标准格式 "2023-2024-1"
+                    const parts = semesterCode.split('-');
+                    if (parts.length === 3) {
+                        return `${parts[0]}-${parts[1]}学年第${parts[2]}学期`;
+                    }
+                    return semesterCode;
+                }
+
+                // 处理对象格式
+                if (typeof semesterCode === 'object' && semesterCode !== null) {
+                    if (semesterCode.year && semesterCode.term) {
+                        return `${semesterCode.year}学年第${semesterCode.term}学期`;
+                    }
+                    if (semesterCode.year && semesterCode.semester) {
+                        return `${semesterCode.year}学年第${semesterCode.semester}学期`;
+                    }
+                    if (semesterCode.term) {
+                        return semesterCode.term;
+                    }
+                }
+
+
+                const grade = arguments[1];
+                if (grade && grade.term) {
+                    return typeof grade.term === 'string' ? grade.term : `第${grade.term}学期`;
+                }
+
+                return '未知';
+            } catch (e) {
+                console.error('解析学期信息出错:', e, semesterCode);
+                return '未知';
+            }
+        }
+
+        // 显示学生信息
+        function displayStudentInfo(student, studentId) {
+            // 显示基本信息
+            document.getElementById('studentName').textContent = student.name;
+            document.getElementById('studentId').textContent = student.id;
+            document.getElementById('studentGender').textContent = student.gender || '未设置';
+            document.getElementById('studentAge').textContent = student.age || '未设置';
+            document.getElementById('studentGrade').textContent = student.grade || '未设置';
+            document.getElementById('studentMajor').textContent = student.major || '未设置';
+            document.getElementById('studentAvatar').textContent = student.name ? student.name.charAt(0).toUpperCase() : '?';
+
+            // 加载成绩信息
+            displayStudentGrades(studentId);
+        }
+
+        // 显示学生成绩
+        function displayStudentGrades(studentId) {
+            const grades = JSON.parse(localStorage.getItem('grades') || '[]');
+            const studentGrades = grades.filter(g => String(g.studentId) === String(studentId));
+
+            console.log('学生成绩数据:', studentGrades);
+
+            if (studentGrades.length > 0) {
+                const scores = studentGrades.map(g => g.score);
+                document.getElementById('avgScore').textContent = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+                document.getElementById('highestScore').textContent = Math.max(...scores);
+                document.getElementById('lowestScore').textContent = Math.min(...scores);
+
+                const gradesTableBody = document.getElementById('gradesTableBody');
+                gradesTableBody.innerHTML = '';
+
+                studentGrades.forEach(grade => {
+                    console.log('单条成绩数据:', grade); // 检查每条成绩的具体结构
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+            <td>${grade.courseName || '未知课程'}</td>
+            <td>${getSemesterDisplay(grade.term || grade.semester, grade)}</td>
+            <td>${grade.score}</td>
+        `;
+                    gradesTableBody.appendChild(row);
+                });
+
+                // 设置表格样式
+                document.querySelectorAll('#gradesTableBody tr').forEach((row, index) => {
+                    if (index % 2 === 1) {
+                        row.style.backgroundColor = '#f9f9f9';
+                    }
+                });
+            } else {
+                document.getElementById('avgScore').textContent = '无';
+                document.getElementById('highestScore').textContent = '无';
+                document.getElementById('lowestScore').textContent = '无';
+
+                document.getElementById('gradesTableBody').innerHTML = '<tr><td colspan="3" style="text-align: center;">暂无成绩记录</td></tr>';
+            }
+        }
+
+
+        // 绑定事件
+        function bindEvents() {
+            document.getElementById('importDataBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // 编辑学生信息的功能
+        function editStudentInfo() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentId = urlParams.get('id');
+            // 跳转到学生编辑页面
+            window.location.href = `student-management.html?edit=${studentId}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 成绩管理</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<div class="layout">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;"/>
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+                <div class="content-header">
+                    <h1><i class="fas fa-graduation-cap"></i> 成绩管理</h1>
+                    <button id="addGradeBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> 添加成绩记录
+                    </button>
+                </div>
+
+                <!-- 搜索和过滤区域 -->
+                <div class="search-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-search"></i> 查询条件</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-form">
+                            <div class="search-row">
+                                <div class="search-item">
+                                    <label for="studentId">学号</label>
+                                    <input type="text" id="studentId" placeholder="请输入学号">
+                                </div>
+                                <div class="search-item">
+                                    <label for="studentName">姓名</label>
+                                    <input type="text" id="studentName" placeholder="请输入姓名">
+                                </div>
+                                <div class="search-item">
+                                    <label for="semester">学期</label>
+                                    <select id="semester">
+                                        <option value="">全部</option>
+                                        <option value="2023-2024-1">2023-2024学年第一学期</option>
+                                        <option value="2023-2024-2">2023-2024学年第二学期</option>
+                                        <option value="2024-2025-1">2024-2025学年第一学期</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="search-row">
+                                <div class="search-item">
+                                    <label for="courseSelect">课程</label>
+                                    <select id="courseSelect">
+                                        <option value="">全部课程</option>
+                                        <!-- 将由JS动态填充 -->
+                                    </select>
+                                </div>
+                                <div class="search-item score-range">
+                                    <label>分数范围</label>
+                                    <div class="range-inputs">
+                                        <input type="number" id="minScore" placeholder="最低分" min="0" max="100">
+                                        <span class="range-separator">至</span>
+                                        <input type="number" id="maxScore" placeholder="最高分" min="0" max="100">
+                                    </div>
+                                </div>
+                                <div class="search-item buttons">
+                                    <button class="btn btn-primary" id="searchBtn">
+                                        <i class="fas fa-search"></i> 查询
+                                    </button>
+                                    <button class="btn btn-outline" id="resetBtn">
+                                        <i class="fas fa-redo"></i> 重置
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> 成绩列表</h3>
+            <div class="card-tools">
+                <button id="organizeGradesBtn" class="btn btn-success btn-sm">
+                    <i class="fas fa-folder-tree"></i> 按考试整理
+                </button>
+                <button id="exportOrganizedGradesBtn" class="btn btn-primary btn-sm">
+                    <i class="fas fa-file-export"></i> 导出JSON
+                </button>
+                <span class="result-count">共 <span id="totalRecords">0</span> 条记录</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>课程</th>
+                        <th>学期</th>
+                        <th>分数</th>
+                        <th>记录日期</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="gradesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="pagination">
+                <button class="btn btn-outline" data-page="prev" disabled>上一页</button>
+                <span>第 <span id="currentPageDisplay">1</span> / <span id="totalPagesDisplay">1</span> 页</span>
+                <button class="btn btn-outline" data-page="next" disabled>下一页</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- 添加/编辑成绩的模态框 -->
+<div class="modal" id="gradeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">添加成绩</h2>
+            <button class="modal-close" id="closeGradeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="gradeForm">
+                <input type="hidden" id="editGradeId">
+                <div class="form-group">
+                    <label for="formStudentId">学生*</label>
+                    <select id="formStudentId" required>
+                        <option value="">请选择学生</option>
+                    </select>
+                    <span class="error-message" id="formStudentId-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formCourseId">课程*</label>
+                    <select id="formCourseId" required>
+                        <option value="">请选择课程</option>
+                    </select>
+                    <span class="error-message" id="formCourseId-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formSemester">学期*</label>
+                    <select id="formSemester" required>
+                        <option value="">请选择学期</option>
+                        <option value="2023-2024-1">2023-2024学年第一学期</option>
+                        <option value="2023-2024-2">2023-2024学年第二学期</option>
+                        <option value="2024-2025-1">2024-2025学年第一学期</option>
+                    </select>
+                    <span class="error-message" id="formSemester-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formScore">成绩*</label>
+                    <input type="number" id="formScore" min="0" max="100" required>
+                    <span class="error-message" id="formScore-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formComments">备注</label>
+                    <textarea id="formComments" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelBtn">取消</button>
+            <button class="btn btn-primary" id="saveGradeBtn">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 确认删除的模态框 -->
+<div class="modal" id="confirmModal">
+    <div class="modal-content confirm-modal">
+        <div class="modal-header">
+            <h2>确认删除</h2>
+            <button class="modal-close" id="closeConfirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>您确定要删除学号为 <span id="deleteStudentId"></span> 的学生在课程 <span id="deleteCourseId"></span>
+                中的成绩记录吗？</p>
+            <p class="warning-text">此操作不可逆，请谨慎操作！</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+        </div>
+    </div>
+</div>
+
+<script src="javascript/dataService.js"></script>
+<script src="javascript/api-client.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script>
+
+    let grades = [];
+    let students = [];
+    let courses = [];
+    let filteredGrades = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+
+    function organizeGradesByExam() {
+        const studentsData = JSON.parse(localStorage.getItem('students') || '[]');
+        const coursesData = JSON.parse(localStorage.getItem('courses') || '[]');
+        const gradesData = JSON.parse(localStorage.getItem('grades') || '[]');
+
+        const organizedGrades = {};
+
+        gradesData.forEach(grade => {
+            const student = studentsData.find(s => s.id === grade.studentId);
+            if (!student) return;
+
+            const examName = grade.semester || '未知学期';
+            const dirKey = `${grade.studentName}_${grade.studentId}_${examName}`;
+
+            if (!organizedGrades[dirKey]) {
+                organizedGrades[dirKey] = {
+                    studentName: grade.studentName,
+                    studentId: grade.studentId,
+                    examName: examName,
+                    grades: []
+                };
+            }
+
+            organizedGrades[dirKey].grades.push({
+                courseId: grade.courseId,
+                courseName: grade.courseName,
+                score: grade.score,
+                recordDate: grade.recordDate
+            });
+        });
+
+        localStorage.setItem('organizedGrades', JSON.stringify(organizedGrades));
+        console.log('成绩数据已按"姓名_学号_考试"格式整理完成');
+
+        return organizedGrades;
+    }
+
+    function editGrade(gradeId) {
+    const grade = grades.find(g => g.id === gradeId);
+    if (grade) {
+        console.log('正在编辑成绩记录:', grade);
+
+        // 设置模态框标题
+        document.getElementById('modalTitle').textContent = '编辑成绩';
+        document.getElementById('editGradeId').value = grade.id;
+
+        // 填充学生下拉框并选中当前学生
+        populateStudentSelect(grade.studentId);
+
+        // 填充课程下拉框并选中当前课程
+        populateCourseFormSelect(grade.courseId);
+
+        // 绑定其他字段
+        document.getElementById('formSemester').value = grade.semester || '';
+        document.getElementById('formScore').value = grade.score || '';
+        document.getElementById('formComments').value = grade.comments || '';
+
+        // 清除错误信息
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        // 显示模态框
+        document.getElementById('gradeModal').style.display = 'flex';
+    } else {
+        console.error('未找到对应的成绩记录，ID:', gradeId);
+        showNotification('未找到对应的成绩记录', 'error');
+    }
+}
+
+    // 删除成绩确认
+    function confirmDeleteGrade(gradeId) {
+        const grade = grades.find(g => g.id === gradeId);
+        if (grade) {
+            document.getElementById('deleteStudentId').textContent = `${grade.studentId} (${grade.studentName})`;
+            document.getElementById('deleteCourseId').textContent = `${grade.courseName}`;
+
+            document.getElementById('confirmModal').style.display = 'flex';
+
+            document.getElementById('confirmDeleteBtn').onclick = () => {
+                deleteGrade(gradeId); // 使用内联函数
+            };
+        }
+    }
+
+    async function deleteGrade(gradeId) {
+        try {
+            grades = grades.filter(g => g.id !== gradeId);
+            filteredGrades = filteredGrades.filter(g => g.id !== gradeId);
+
+            // 更新localStorage
+            localStorage.setItem('grades', JSON.stringify(grades));
+
+            document.getElementById('confirmModal').style.display = 'none';
+            renderGradeTable();
+            showNotification('成绩记录已删除', 'success');
+        } catch (error) {
+            console.error('删除成绩失败:', error);
+            showNotification('删除成绩失败', 'error');
+        }
+    }
+
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('expanded');
+
+        // 根据侧边栏状态切换图标方向
+        const icon = this.querySelector('i');
+        if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+            icon.classList.remove('fa-angle-left');
+            icon.classList.add('fa-angle-right');
+        } else {
+            icon.classList.remove('fa-angle-right');
+            icon.classList.add('fa-angle-left');
+        }
+    });
+
+
+    function exportGradesByStudentAndCourse() {
+        // 确保数据是最新的
+        const gradesData = JSON.parse(localStorage.getItem('grades') || '[]');
+
+        // 按学生分组
+        const studentGradesMap = {};
+        gradesData.forEach(grade => {
+            if (!studentGradesMap[grade.studentId]) {
+                studentGradesMap[grade.studentId] = {
+                    studentName: grade.studentName,
+                    courses: {}
+                };
+            }
+
+            if (!studentGradesMap[grade.studentId].courses[grade.courseId]) {
+                studentGradesMap[grade.studentId].courses[grade.courseId] = {
+                    courseName: grade.courseName,
+                    grades: []
+                };
+            }
+
+            studentGradesMap[grade.studentId].courses[grade.courseId].grades.push({
+                semester: grade.semester,
+                score: grade.score,
+                grade: grade.grade,
+                recordDate: grade.recordDate,
+                comments: grade.comments
+            });
+        });
+
+        // 创建文件夹和文件
+        Object.keys(studentGradesMap).forEach(studentId => {
+            const studentData = studentGradesMap[studentId];
+            const studentFolderName = `${studentData.studentName}_${studentId}`;
+
+            Object.keys(studentData.courses).forEach(courseId => {
+                const courseData = studentData.courses[courseId];
+                const fileName = `${courseData.courseName}_${courseId}.json`;
+
+                // 转换为JSON字符串
+                const jsonString = JSON.stringify(courseData.grades, null, 2);
+
+                // 创建下载链接
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                // 创建临时下载链接并触发下载
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${studentFolderName}/${fileName}`;
+                document.body.appendChild(a);
+                a.click();
+
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            });
+        });
+
+        console.log('成绩数据已按学生和课程导出为JSON文件');
+    }
+
+    async function exportGradesAsZip() {
+      try {
+        // 从API获取最新数据
+        const gradesData = await fetchGrades();
+
+        // 创建 ZIP 文件
+        const zip = new JSZip();
+
+        // 按学生分组
+        const studentGradesMap = {};
+        gradesData.forEach(grade => {
+            if (!studentGradesMap[grade.studentId]) {
+                studentGradesMap[grade.studentId] = {
+                    studentName: grade.studentName,
+                    studentId: grade.studentId,
+                    courses: {}
+                };
+            }
+
+            if (!studentGradesMap[grade.studentId].courses[grade.courseId]) {
+                studentGradesMap[grade.studentId].courses[grade.courseId] = {
+                    courseName: grade.courseName,
+                    courseId: grade.courseId,
+                    grades: []
+                };
+            }
+
+            studentGradesMap[grade.studentId].courses[grade.courseId].grades.push({
+                semester: grade.semester,
+                score: grade.score,
+                grade: getGradeLevel(grade.score),
+                recordDate: grade.recordDate,
+                comments: grade.comments
+            });
+        });
+
+        // 将数据添加到ZIP
+        Object.keys(studentGradesMap).forEach(studentId => {
+            const studentData = studentGradesMap[studentId];
+            const studentFolder = zip.folder(`${studentData.studentName}_${studentId}`);
+
+            Object.keys(studentData.courses).forEach(courseId => {
+                const courseData = studentData.courses[courseId];
+                const fileName = `${courseData.courseName}_${courseId}.json`;
+
+                // 将 JSON 数据添加到 ZIP 文件夹中
+                studentFolder.file(fileName, JSON.stringify(courseData.grades, null, 2));
+            });
+        });
+
+        // 生成 ZIP 并触发下载
+        zip.generateAsync({ type: 'blob' }).then(content => {
+            saveAs(content, 'student_grades.zip');
+            showNotification('成绩数据已打包为 ZIP 文件并导出', 'success');
+        });
+      } catch (error) {
+        console.error('导出成绩数据失败:', error);
+        showNotification('从API获取数据失败，使用本地数据导出', 'warning');
+
+        // 回退到使用本地数据
+        const gradesData = JSON.parse(localStorage.getItem('grades') || '[]');
+
+        // 创建 ZIP 文件
+        const zip = new JSZip();
+
+        // 按学生分组
+        const studentGradesMap = {};
+        gradesData.forEach(grade => {
+            if (!studentGradesMap[grade.studentId]) {
+                studentGradesMap[grade.studentId] = {
+                    studentName: grade.studentName,
+                    studentId: grade.studentId,
+                    courses: {}
+                };
+            }
+
+            if (!studentGradesMap[grade.studentId].courses[grade.courseId]) {
+                studentGradesMap[grade.studentId].courses[grade.courseId] = {
+                    courseName: grade.courseName,
+                    courseId: grade.courseId,
+                    grades: []
+                };
+            }
+
+            studentGradesMap[grade.studentId].courses[grade.courseId].grades.push({
+                semester: grade.semester,
+                score: grade.score,
+                grade: getGradeLevel(grade.score),
+                recordDate: grade.recordDate,
+                comments: grade.comments
+            });
+        });
+
+        // 将数据添加到ZIP
+        Object.keys(studentGradesMap).forEach(studentId => {
+            const studentData = studentGradesMap[studentId];
+            const studentFolder = zip.folder(`${studentData.studentName}_${studentId}`);
+
+            Object.keys(studentData.courses).forEach(courseId => {
+                const courseData = studentData.courses[courseId];
+                const fileName = `${courseData.courseName}_${courseId}.json`;
+
+                // 将 JSON 数据添加到 ZIP 文件夹中
+                studentFolder.file(fileName, JSON.stringify(courseData.grades, null, 2));
+            });
+        });
+
+        // 生成 ZIP 并触发下载
+        zip.generateAsync({ type: 'blob' }).then(content => {
+            saveAs(content, 'student_grades.zip');
+            showNotification('成绩数据已从本地存储打包为 ZIP 文件并导出', 'success');
+        });
+      }
+    }
+
+    function fixGradesData() {
+        let needsUpdate = false;
+
+        grades = grades.map(grade => {
+            let updated = false;
+
+            if (!grade.semester || typeof grade.semester !== 'string' ||
+                !grade.semester.match(/^\d{4}-\d{4}-[12]$/)) {
+                grade.semester = '2023-2024-1'; // 默认学期
+                updated = true;
+            }
+
+            if (!grade.recordDate || typeof grade.recordDate !== 'string' ||
+                !grade.recordDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                grade.recordDate = new Date().toISOString().split('T')[0];
+                updated = true;
+            }
+
+            if (updated) needsUpdate = true;
+            return grade;
+        });
+
+        if (needsUpdate) {
+            localStorage.setItem('grades', JSON.stringify(grades));
+            console.log('成绩数据已修复');
+        }
+    }
+
+
+    function initializeStudentGrades() {
+        if (localStorage.getItem('grades')) {
+            console.log('已有成绩数据，无需初始化');
+            return; // 如果已有数据，直接返回
+        }
+        grades = [];
+
+        // 为每个学生生成个性化成绩
+        students.forEach(student => {
+            const baseAbility = Math.floor(Math.random() * 35) + 60;
+
+            const preferences = {};
+            courses.forEach(course => {
+                preferences[course.id] = Math.floor(Math.random() * 25) - 10;
+            });
+
+            courses.forEach(course => {
+                if (Math.random() < 0.75) {
+                    let score = baseAbility + preferences[course.id];
+                    score += Math.floor(Math.random() * 16) - 8;
+                    score = Math.max(0, Math.min(100, score));
+
+                    const semester = ['2023-2024-1', '2023-2024-2', '2024-2025-1'][Math.floor(Math.random() * 3)];
+
+                    grades.push({
+                        id: `G${String(grades.length + 1).padStart(3, '0')}`,
+                        studentId: student.id,
+                        studentName: student.name,
+                        courseId: course.id,
+                        courseName: course.name,
+                        semester: semester,
+                        score: score,
+                        grade: getGradeLevel(score),
+                        recordDate: randomPastDate(semester),
+                        comments: ''
+                    });
+                }
+            });
+        });
+
+        localStorage.setItem('grades', JSON.stringify(grades));
+        return grades;
+    }
+
+    function randomPastDate(semester) {
+        try {
+            const parts = semester.split('-');
+            if (parts.length !== 3) {
+                return new Date().toISOString().split('T')[0]; // 默认返回今天日期
+            }
+
+            const year = parseInt(parts[0]);
+            const term = parseInt(parts[2]);
+
+            // 第一学期为9月-1月，第二学期为2月-6月
+            let month, day;
+            if (term === 1) {
+                month = Math.floor(Math.random() * 5) + 9;
+                if (month > 12) {
+                    // 如果是10-12月，用当前年份；如果是1月，用下一年
+                    const actualYear = month > 12 ? year + 1 : year;
+                    month = month > 12 ? month - 12 : month;
+                    day = Math.floor(Math.random() * 28) + 1;
+                    return `${actualYear}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                }
+            } else {
+                month = Math.floor(Math.random() * 5) + 2;
+            }
+
+            day = Math.floor(Math.random() * 28) + 1;
+            return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        } catch (e) {
+            console.error("日期生成错误:", e);
+            return new Date().toISOString().split('T')[0]; // 出错时返回今天日期
+        }
+    }
+
+
+    // 验证成绩表单
+    function validateGradeForm() {
+        let isValid = true;
+
+        // 清除所有错误信息
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        // 验证学生
+        if (!document.getElementById('formStudentId').value) {
+            document.getElementById('formStudentId-error').textContent = '请选择学生';
+            isValid = false;
+        }
+
+        // 验证课程
+        if (!document.getElementById('formCourseId').value) {
+            document.getElementById('formCourseId-error').textContent = '请选择课程';
+            isValid = false;
+        }
+
+        // 验证学期
+        if (!document.getElementById('formSemester').value) {
+            document.getElementById('formSemester-error').textContent = '请选择学期';
+            isValid = false;
+        }
+
+        // 验证成绩
+        const score = document.getElementById('formScore').value;
+        if (!score) {
+            document.getElementById('formScore-error').textContent = '请输入成绩';
+            isValid = false;
+        } else if (isNaN(score) || parseInt(score) < 0 || parseInt(score) > 100) {
+            document.getElementById('formScore-error').textContent = '成绩必须在0-100之间';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function populateCourseSelect(courses) {
+        const courseSelect = document.getElementById('courseSelect');
+        courseSelect.innerHTML = '<option value="">全部课程</option>';
+
+        // 遍历课程数据并填充下拉菜单
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.courseId || course.id;
+            option.textContent = course.courseName || course.name || '未定义课程名';
+            courseSelect.appendChild(option);
+        });
+    }
+
+    function populateStudentSelect(selectedStudentId) {
+        const studentSelect = document.getElementById('formStudentId');
+        studentSelect.innerHTML = '<option value="">请选择学生</option>';
+
+        students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = String(student.id);
+            option.textContent = student.name; // 显示学生姓名
+
+            if (selectedStudentId && String(student.id) === String(selectedStudentId)) {
+                option.selected = true;
+            }
+
+            studentSelect.appendChild(option);
+        });
+    }
+
+    function populateCourseFormSelect(selectedCourseId) {
+        const courseSelect = document.getElementById('formCourseId');
+        courseSelect.innerHTML = '<option value="">请选择课程</option>';
+
+        // 从 localStorage 加载课程数据
+        const courses = JSON.parse(localStorage.getItem('courses')) || [];
+
+        if (courses.length === 0) {
+            console.error('课程数据未加载或为空，请检查 localStorage 中的 courses 数据');
+            return;
+        }
+
+        // 遍历课程数据并填充下拉菜单
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.courseId;
+            option.textContent = course.courseName || `未定义课程名 (${course.courseId})`; // 使用 courseName 显示课程名
+
+            // 如果传入了选中的课程 ID，则设置为选中状态
+            if (selectedCourseId && course.courseId === selectedCourseId) {
+                option.selected = true;
+            }
+
+            courseSelect.appendChild(option);
+        });
+    }
+
+    // 渲染成绩表格
+    function renderGradeTable() {
+        const tableBody = document.getElementById('gradesTableBody');
+        tableBody.innerHTML = '';
+
+        // 计算分页
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, filteredGrades.length);
+
+        // 记录索引，用于删除和编辑
+        const paginated = filteredGrades.slice(startIndex, endIndex);
+
+
+        if (paginated.length === 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.className = 'empty-row';
+            emptyRow.innerHTML = `<td colspan="8">暂无成绩记录</td>`;
+            tableBody.appendChild(emptyRow);
+        } else {
+            paginated.forEach(grade => {
+                const row = document.createElement('tr');
+
+                if (grade.score < 60) {
+                    row.classList.add('highlight-fail');
+                } else if (grade.score >= 90) {
+                    row.classList.add('highlight-excellent');
+                }
+
+               row.innerHTML = `
+            <td>${grade.studentId || grade.student_id}</td>
+            <td>${grade.studentName}</td>
+            <td>${grade.courseName}</td>
+            <td>${getSemesterDisplay(grade.semester)}</td>
+            <td>${grade.score}</td>
+            <td>${formatDate(grade.recordDate)}</td>
+        `;
+
+                // 创建操作单元格和按钮
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'action-cell';
+
+                // 创建编辑按钮
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-primary';
+                editBtn.textContent = '编辑';
+                editBtn.addEventListener('click', function () {
+                    editGrade(grade.id);
+                });
+
+                // 创建删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-danger';
+                deleteBtn.textContent = '删除';
+                deleteBtn.addEventListener('click', function () {
+                    confirmDeleteGrade(grade.id);
+                });
+
+                // 添加按钮到单元格
+                actionsCell.appendChild(editBtn);
+                actionsCell.appendChild(deleteBtn);
+                row.appendChild(actionsCell);
+
+                tableBody.appendChild(row);
+            });
+
+            // 更新分页信息
+            const totalPages = Math.max(1, Math.ceil(filteredGrades.length / itemsPerPage));
+            document.getElementById('currentPageDisplay').textContent = currentPage;
+            document.getElementById('totalPagesDisplay').textContent = totalPages;
+
+            // 禁用/启用上一页、下一页按钮
+            document.querySelector('[data-page="prev"]').disabled = currentPage === 1;
+            document.querySelector('[data-page="next"]').disabled = currentPage === totalPages;
+        }
+    }
+
+    // 获取成绩等级
+    function getGradeLevel(score) {
+        if (score >= 90) return 'A';
+        if (score >= 80) return 'B';
+        if (score >= 70) return 'C';
+        if (score >= 60) return 'D';
+        return 'F';
+    }
+
+
+    function formatDate(dateString) {
+        if (!dateString) return '未记录';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '未记录';
+
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        } catch (e) {
+            return '未记录';
+        }
+    }
+
+    // 获取学期显示格式
+    function getSemesterDisplay(semesterCode) {
+        if (!semesterCode) return '未知';
+
+        // 如果已经是完整格式，直接返回
+        if (semesterCode.includes('学年')) {
+            return semesterCode;
+        }
+
+        // 转换简短格式为完整格式
+        try {
+            const parts = semesterCode.split('-');
+            if (parts.length >= 3) {
+                const academicYear = parts[0] + '-' + parts[1];
+                const term = parts[2];
+
+                const termMap = {
+                    '1': '第一学期',
+                    '2': '第二学期',
+                    '3': '第三学期',
+                    'summer': '暑期学期'
+                };
+
+                return `${academicYear}学年${termMap[term] || ''}`;
+            }
+            return semesterCode;
+        } catch (e) {
+            console.error('学期格式转换错误:', e);
+            return semesterCode; // 如果转换失败，返回原始值
+        }
+    }
+
+    // 显示通知
+    function showNotification(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerText = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        function updateGradesStudentIds() {
+            const studentMap = {};
+            students.forEach(student => {
+                studentMap[student.id] = student;
+            });
+
+            grades = grades.map(grade => {
+                if (!grade.studentId && grade.studentId !== 0) {
+                    const student = studentMap[grade.id];
+                    if (student) {
+                        grade.studentId = student.id;
+                    }
+                }
+                return grade;
+            });
+
+            // 更新本地存储
+            localStorage.setItem('grades', JSON.stringify(grades));
+            console.log('成绩数据中的学生ID已更新');
+        }
+
+        const importIcon = document.querySelector('#importDataBtn .icon');
+        importIcon.className = 'icon'; // 只保留基本icon类
+        importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+        const exportIcon = document.querySelector('#exportDataBtn .icon');
+        exportIcon.className = 'icon';
+        exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+        const logoutIcon = document.querySelector('#logoutBtn .icon');
+        logoutIcon.className = 'icon';
+        logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+        // 获取当前用户信息
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        if (!currentUser.username) {
+            // 如果未登录，跳转到登录页
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // 检查用户角色
+        if (currentUser.role === 'student') {
+            // 显示权限不足提示并重定向
+            alert('权限不足：学生用户无法访问成绩管理页面');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
+        // 设置用户信息
+        document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+        const userRole = currentUser.role || 'student';
+        const roleMap = {
+            'student': '学生',
+            'teacher': '教师',
+            'admin': '管理员'
+        };
+        document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+        // 设置用户头像
+        const userAvatar = document.getElementById('userAvatar');
+        userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+        try {
+            // 从API加载数据
+            grades = await fetchGrades();
+            students = await fetchStudents();
+            courses = await fetchCourses();
+
+            console.log('从API加载数据成功:', {
+                grades: grades.length,
+                students: students.length,
+                courses: courses.length
+            });
+
+            fixGradesData();
+            filteredGrades = [...grades];
+            currentPage = 1;
+
+            // 填充课程下拉选择框
+            populateCourseSelect(courses);
+
+            // 填充表格
+            renderGradeTable();
+            document.getElementById('totalRecords').textContent = filteredGrades.length;
+        } catch (error) {
+            console.error('从API加载数据失败:', error);
+            showNotification('无法从服务器加载数据，使用本地存储数据作为备份', 'warning');
+
+            // 回退到本地存储
+            grades = JSON.parse(localStorage.getItem('grades')) || [];
+            students = JSON.parse(localStorage.getItem('students')) || [];
+            courses = JSON.parse(localStorage.getItem('courses')) || [];
+
+            fixGradesData();
+            updateGradesStudentIds();
+            filteredGrades = [...grades];
+            currentPage = 1;
+
+            // 填充课程下拉选择框
+            populateCourseSelect(courses);
+
+            // 填充表格
+            renderGradeTable();
+            document.getElementById('totalRecords').textContent = filteredGrades.length;
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', function () {
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const semester = document.getElementById('semester').value;
+            const courseId = document.getElementById('courseSelect').value;
+            const minScore = document.getElementById('minScore').value ? parseInt(document.getElementById('minScore').value) : null;
+            const maxScore = document.getElementById('maxScore').value ? parseInt(document.getElementById('maxScore').value) : null;
+
+            // 输出数据结构帮助调试
+            console.log("搜索条件:", { studentId, studentName, semester, courseId, minScore, maxScore });
+            console.log("成绩数据示例:", grades.length > 0 ? grades[0] : "无数据");
+
+            filteredGrades = grades.filter(grade => {
+                const gradeStudentId = grade.studentId || grade.student_id;
+
+                const exactMatch = !studentId || String(gradeStudentId) === String(studentId);
+
+                if (studentId && gradeStudentId && String(gradeStudentId) === "1") {
+                    console.log("找到学号1记录:", grade);
+                }
+
+                return exactMatch &&
+                       (!studentName || (grade.studentName && grade.studentName.includes(studentName))) &&
+                       (!semester || grade.semester === semester) &&
+                       (!courseId || String(grade.courseId || grade.course_id) === String(courseId)) &&
+                       (!minScore || (grade.score !== undefined && grade.score >= minScore)) &&
+                       (!maxScore || (grade.score !== undefined && grade.score <= maxScore));
+            });
+
+            console.log("过滤后成绩记录数:", filteredGrades.length);
+            document.getElementById('totalRecords').textContent = filteredGrades.length;
+            currentPage = 1;
+            renderGradeTable();
+        });
+
+        // 重置按钮点击事件
+        document.getElementById('resetBtn').addEventListener('click', function () {
+            document.getElementById('studentId').value = '';
+            document.getElementById('studentName').value = '';
+            document.getElementById('semester').value = '';
+            document.getElementById('courseSelect').value = '';
+            document.getElementById('minScore').value = '';
+            document.getElementById('maxScore').value = '';
+
+            filteredGrades = [...grades];
+            currentPage = 1;
+            renderGradeTable();
+
+            document.getElementById('totalRecords').textContent = filteredGrades.length;
+        });
+
+        document.getElementById('addGradeBtn').addEventListener('click', function () {
+            document.getElementById('modalTitle').textContent = '添加成绩';
+            document.getElementById('gradeForm').reset();
+            document.getElementById('editGradeId').value = '';
+
+            populateStudentSelect(); // 填充学生下拉框
+            populateCourseFormSelect(); // 填充课程下拉框
+
+            document.getElementById('gradeModal').style.display = 'flex';
+        });
+
+        document.getElementById('saveGradeBtn').addEventListener('click', async function () {
+            if (validateGradeForm()) {
+                const editGradeId = document.getElementById('editGradeId').value.trim();
+                const isEditing = !!editGradeId;
+
+                const studentId = document.getElementById('formStudentId').value;
+                const selectedStudent = students.find(s => String(s.id) === String(studentId));
+
+                const courseId = document.getElementById('formCourseId').value;
+                const selectedCourse = courses.find(c => String(c.courseId) === String(courseId) || String(c.id) === String(courseId));
+
+                if (!selectedStudent || !selectedCourse) {
+                    showNotification('学生或课程信息不存在', 'error');
+                    return;
+                }
+
+                const semester = document.getElementById('formSemester').value;
+                const score = parseInt(document.getElementById('formScore').value);
+                const comments = document.getElementById('formComments').value.trim();
+
+                // 创建标准格式的成绩数据对象
+                const gradeData = {
+                    id: isEditing ? editGradeId : Date.now().toString(),
+                    studentId: selectedStudent.id,
+                    studentName: selectedStudent.name,
+                    courseId: selectedCourse.courseId || selectedCourse.id,
+                    courseName: selectedCourse.courseName || selectedCourse.name,
+                    semester: semester,
+                    score: score,
+                    recordDate: new Date().toISOString().split('T')[0],
+                    comments: comments
+                };
+
+                try {
+                    // 调用API保存成绩
+                    let savedGrade = await saveGrade(gradeData);
+
+                    if (savedGrade) {
+                        savedGrade = {
+                            id: savedGrade.id || gradeData.id,
+                            studentId: savedGrade.studentId || savedGrade.student_id || gradeData.studentId,
+                            studentName: savedGrade.studentName || gradeData.studentName,
+                            courseId: savedGrade.courseId || savedGrade.course_id || gradeData.courseId,
+                            courseName: savedGrade.courseName || gradeData.courseName,
+                            semester: savedGrade.semester || gradeData.semester,
+                            score: savedGrade.score || gradeData.score,
+                            recordDate: savedGrade.recordDate || savedGrade.record_date || gradeData.recordDate,
+                            comments: savedGrade.comments || gradeData.comments
+                        };
+                    } else {
+                        // 如果API没有返回有效数据，使用本地数据
+                        savedGrade = gradeData;
+                    }
+
+                    if (isEditing) {
+                        // 更新本地数组中的成绩
+                        const index = grades.findIndex(g => g.id === editGradeId);
+                        if (index !== -1) {
+                            grades[index] = savedGrade;
+                        }
+
+                        // 更新过滤后的数组
+                        const filteredIndex = filteredGrades.findIndex(g => g.id === editGradeId);
+                        if (filteredIndex !== -1) {
+                            filteredGrades[filteredIndex] = savedGrade;
+                        }
+                    } else {
+                        grades.push(savedGrade);
+                        filteredGrades.push(savedGrade);
+                    }
+
+                    // 更新本地存储
+                    localStorage.setItem('grades', JSON.stringify(grades));
+
+                    renderGradeTable();
+                    document.getElementById('gradeModal').style.display = 'none';
+                    showNotification(isEditing ? '成绩信息已更新' : '成绩添加成功', 'success');
+
+                    // 更新记录数量显示
+                    document.getElementById('totalRecords').textContent = filteredGrades.length;
+                } catch (error) {
+                    console.error('保存成绩失败:', error);
+                    showNotification('保存成绩失败: ' + (error.message || '未知错误'), 'error');
+
+                    // 回退到本地存储
+                    if (isEditing) {
+                        const index = grades.findIndex(g => g.id === editGradeId);
+                        if (index !== -1) {
+                            grades[index] = gradeData;
+                        }
+                    } else {
+                        grades.push(gradeData);
+                        filteredGrades.push(gradeData);
+                    }
+
+                    localStorage.setItem('grades', JSON.stringify(grades));
+                    renderGradeTable();
+                }
+            }
+        });
+
+        // 关闭模态框
+        document.querySelectorAll('.modal-close, #cancelBtn').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('gradeModal').style.display = 'none';
+            });
+        });
+
+        document.querySelectorAll('#closeConfirmModal, #cancelDeleteBtn').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('confirmModal').style.display = 'none';
+            });
+        });
+
+        // 分页控制
+        document.querySelector('[data-page="prev"]').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderGradeTable();
+            }
+        });
+
+        document.querySelector('[data-page="next"]').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredGrades.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderGradeTable();
+            }
+        });
+
+        // 退出登录
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('organizeGradesBtn').addEventListener('click', function() {
+            organizeGradesByExam();
+            showNotification('成绩已按"姓名_学号_考试"格式整理完成！', 'success');
+        });
+
+        // 绑定导入按钮事件
+        document.getElementById('importDataBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // 绑定文件输入事件
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('请选择一个 JSON 文件！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // 解析 JSON 数据
+                    const data = JSON.parse(e.target.result);
+
+                    // 验证数据结构
+                    if (data.students && data.teachers && data.admins && data.courses && data.grades && data.certificates && data.users) {
+                        // 将数据存入 localStorage
+                        localStorage.setItem('students', JSON.stringify(data.students));
+                        localStorage.setItem('teachers', JSON.stringify(data.teachers));
+                        localStorage.setItem('admins', JSON.stringify(data.admins));
+                        localStorage.setItem('courses', JSON.stringify(data.courses));
+                        localStorage.setItem('grades', JSON.stringify(data.grades));
+                        localStorage.setItem('certificates', JSON.stringify(data.certificates));
+                        localStorage.setItem('users', JSON.stringify(data.users));
+
+                        // 如果包含当前用户信息，则更新
+                        if (data.currentUser) {
+                            localStorage.setItem('currentUser', JSON.stringify(data.currentUser));
+                        }
+
+                        alert('数据导入成功！请刷新页面以查看更新。');
+                        location.reload();
+                    } else {
+                        alert('文件格式不正确，请检查 JSON 数据结构！');
+                    }
+                } catch (error) {
+                    alert('导入失败：文件内容无效或解析错误！');
+                    console.error(error);
+                }
+            };
+
+            reader.readAsText(file);
+        });
+
+        document.getElementById('exportDataBtn').addEventListener('click', function () {
+            // 调用导出为 ZIP 的函数
+            exportGradesAsZip();
+            showNotification('成绩数据已打包为 ZIP 文件并导出', 'success');
+        });
+
+        document.getElementById('exportOrganizedGradesBtn').addEventListener('click', function () {
+            exportGradesByStudentAndCourse();
+            showNotification('成绩数据已按学生和课程导出为 JSON 文件', 'success');
+        });
+
+
+        window.editGrade = editGrade;
+        window.confirmDeleteGrade = confirmDeleteGrade;
+        window.deleteGrade = deleteGrade;
+
+        window.populateStudentSelect = populateStudentSelect;
+        window.populateCourseFormSelect = populateCourseFormSelect;
+
+        // 退出登录
+        document.querySelectorAll('#logoutBtn, #logoutBtnBottom').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 证书管理</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="javascript/common.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .content-wrapper {
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+            width: 100%;
+        }
+
+        .container-fluid {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .card {
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+        }
+
+        .card-body {
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+
+        .main-content {
+            width: calc(100% - 250px);
+            padding: 0;
+        }
+
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 10px;
+            }
+
+            .card {
+                overflow-x: auto;
+            }
+        }
+
+
+        .data-table th:last-child {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .data-table td.action-cell {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+
+        .data-table .action-cell button {
+            margin: 2px 5px;
+            display: inline-block;
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .modal-footer button {
+            margin-left: 10px;
+        }
+
+        .modal {
+            z-index: 1050 !important;
+            overflow: visible !important;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+
+        .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            appearance: menulist-button;
+            -webkit-appearance: menulist;
+            -moz-appearance: menulist;
+            background-color: #fff;
+        }
+
+
+        select#formStudentId {
+            position: relative !important;
+            z-index: 1050 !important;
+            pointer-events: auto !important;
+            appearance: menulist-button;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+
+        .form-group {
+            overflow: visible !important;
+            position: relative !important;
+        }
+
+
+        .modal-body {
+            overflow: visible !important;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: 500;
+        }
+
+        .confirm-modal {
+            max-width: 400px;
+        }
+
+        select#formStudentId {
+            -webkit-appearance: menulist-button;
+            -moz-appearance: menulist-button;
+            appearance: menulist-button;
+            cursor: pointer;
+            background-color: #fff;
+            position: relative;
+            z-index: 100;
+        }
+
+        .modal-body .form-group {
+            position: relative;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;"/>
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="top-bar">
+                            <h1>证书管理</h1>
+                            <p>管理学生的证书信息</p>
+                        </div>
+
+                        <div class="filter-panel">
+                            <div class="form-group">
+                                <label for="studentSearch">学生姓名/学号</label>
+                                <input type="text" id="studentSearch" placeholder="输入学生姓名或学号">
+                            </div>
+                            <div class="form-group">
+                                <label for="certificateType">证书类型</label>
+                                <select id="certificateType">
+                                    <option value="">全部</option>
+                                    <option value="CET-4">CET-4</option>
+                                    <option value="CET-6">CET-6</option>
+                                    <option value="计算机等级考试">计算机等级考试</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="filterBtn">查询</button>
+                        </div>
+
+                        <div class="data-section">
+                            <div class="section-header">
+                                <h2>证书列表</h2>
+                                <button class="btn btn-primary" id="addCertificateBtn">添加证书</button>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>证书名称</th>
+                                    <th>颁发日期</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody id="certificateTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="certificateModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">添加证书</h2>
+            <button class="modal-close" id="closeCertificateModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="certificateForm">
+                <input type="hidden" id="editCertificateId">
+                <div class="form-group">
+                    <label for="formStudentId">学生*</label>
+                    <select id="formStudentId" required>
+                        <option value="">请选择学生</option>
+                    </select>
+                    <span class="error-message" id="formStudentId-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formCertificateName">证书名称*</label>
+                    <input type="text" id="formCertificateName" required>
+                    <span class="error-message" id="formCertificateName-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formIssueDate">获得日期*</label>
+                    <input type="date" id="formIssueDate" required>
+                    <span class="error-message" id="formIssueDate-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="formDescription">证书描述</label>
+                    <textarea id="formDescription" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelBtn">取消</button>
+            <button class="btn btn-primary" id="saveCertificateBtn">保存</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="confirmModal">
+    <div class="modal-content confirm-modal">
+        <div class="modal-header">
+            <h2>确认删除</h2>
+            <button class="modal-close" id="closeConfirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>您确定要删除此证书记录吗？</p>
+            <p class="warning-text">此操作不可逆，请谨慎操作！</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script type="module" src="javascript/dataService.js"></script>
+<script type="module">
+  const { fetchStudents, fetchCertificates, saveCertificate, deleteCertificate } = window.dataService;
+  let studentsCache = null;
+
+  async function loadCertificatesFromService() {
+    try {
+      studentsCache = JSON.parse(localStorage.getItem('students') || '[]');
+      console.log('已加载学生缓存:', studentsCache.length, studentsCache.slice(0, 2));
+
+      // 从服务器获取证书数据
+      let certificatesFromServer = await fetchCertificates();
+      console.log('从服务器获取证书数据:', certificatesFromServer.length);
+
+      // 为每个证书补充学生姓名
+      certificates = certificatesFromServer.map(cert => {
+        // 如果证书中已有学生姓名且不是"未知学生"，则保留
+        if (cert.studentName && cert.studentName !== '未知学生') {
+          return cert;
+        }
+
+        // 从学生缓存中查找学生
+        const student = studentsCache.find(s => String(s.id) === String(cert.studentId));
+
+        // 如果找到学生，使用学生姓名；否则保持"未知学生"
+        return {
+          ...cert,
+          studentName: student ? student.name : '未知学生'
+        };
+      });
+
+      console.log('处理后的证书数据:', certificates.slice(0, 2));
+
+      // 更新本地存储
+      localStorage.setItem('certificates', JSON.stringify(certificates));
+
+      filteredCertificates = [...certificates];
+      renderCertificateTable();
+    } catch (error) {
+      console.error('加载证书数据失败:', error);
+      alert('无法从服务器加载证书数据，请检查后端服务是否正常运行。');
+      certificates = [];
+      filteredCertificates = [];
+      renderCertificateTable();
+    }
+  }
+
+  function getStudentNameById(studentId) {
+    if (!studentId) return '未知学生';
+
+    // 确保学生缓存已加载
+    if (!studentsCache || studentsCache.length === 0) {
+      studentsCache = JSON.parse(localStorage.getItem('students') || '[]');
+    }
+
+    // 查找学生
+    const student = studentsCache.find(s => String(s.id) === String(studentId));
+    console.log(`查找学生ID=${studentId}:`, student ? `找到:${student.name}` : '未找到');
+
+    return student ? student.name : '未知学生';
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        loadCertificatesFromService();
+    } catch (error) {
+      console.error('初始化失败:', error);
+    }
+  });
+
+    const fixStyle = document.createElement('style');
+    fixStyle.textContent = `
+    #studentSearch {
+    z-index: 9999 !important;
+    position: relative !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+    }
+
+    .filter-panel .form-group {
+    position: relative;
+    z-index: 100;
+    }
+    `;
+    document.head.appendChild(fixStyle);
+
+    // 证书数据结构
+    let certificates = [];
+    let currentUser = {};
+    let filteredCertificates = [];
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+
+
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('expanded');
+
+        // 根据侧边栏状态切换图标方向
+        const icon = this.querySelector('i');
+        if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+            icon.classList.remove('fa-angle-left');
+            icon.classList.add('fa-angle-right');
+        } else {
+            icon.classList.remove('fa-angle-right');
+            icon.classList.add('fa-angle-left');
+        }
+    });
+
+    // 检查用户权限
+    function checkUserPermission() {
+        if (currentUser.role === 'student') {
+            document.getElementById('addCertificateBtn').style.display = 'none';
+            document.getElementById('studentSearch').value = currentUser.studentId || '';
+            document.getElementById('studentSearch').disabled = true;
+            filterCertificates();
+        }
+    }
+
+
+    function wrapTableWithResponsiveContainer() {
+        const table = document.querySelector('.data-table');
+        if (table && !table.parentNode.classList.contains('table-responsive')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-responsive';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        }
+    }
+
+
+    function loadCertificates() {
+        // 获取证书数据
+        certificates = JSON.parse(localStorage.getItem('certificates') || '[]');
+
+        filteredCertificates = [...certificates];
+        renderCertificateTable();
+    }
+
+   function renderCertificateTable() {
+        const tableBody = document.getElementById('certificateTableBody');
+        tableBody.innerHTML = '';
+
+        if (filteredCertificates.length === 0) {
+            // 无数据显示
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="6" class="no-data">暂无证书记录</td>';
+            tableBody.appendChild(row);
+            return;
+        }
+
+        // 计算当前页的数据
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = Math.min(start + PAGE_SIZE, filteredCertificates.length);
+        const pageData = filteredCertificates.slice(start, end);
+
+        // 创建表格行
+        pageData.forEach(certificate => {
+            const row = document.createElement('tr');
+
+
+            row.innerHTML = `
+              <td>${certificate.studentId || '未知'}</td>
+              <td>${certificate.studentName || '未知学生'}</td>
+              <td>${certificate.name || '未命名证书'}</td>
+              <td>${formatDate(certificate.issueDate) || '未设置'}</td>
+            `;
+
+            // 创建操作单元格
+            const actionsCell = document.createElement('td');
+            actionsCell.className = 'action-cell';
+
+            // 创建编辑按钮
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-primary';
+            editBtn.textContent = '编辑';
+            editBtn.setAttribute('data-id', certificate.id);
+            editBtn.addEventListener('click', function() {
+                editCertificate(certificate.id);
+            });
+
+            // 创建删除按钮
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-sm btn-danger';
+            deleteBtn.textContent = '删除';
+            deleteBtn.setAttribute('data-id', certificate.id);
+            deleteBtn.addEventListener('click', function() {
+                handleDeleteCertificate(certificate.id);
+            });
+
+            // 添加按钮到单元格
+            actionsCell.appendChild(editBtn);
+            actionsCell.appendChild(deleteBtn);
+            row.appendChild(actionsCell);
+
+            tableBody.appendChild(row);
+        });
+
+        // 更新分页信息
+        updatePagination();
+    }
+
+    // 更新分页控件
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredCertificates.length / PAGE_SIZE);
+
+        // 如果没有分页区域，则创建一个
+        let paginationDiv = document.querySelector('.pagination');
+        if (!paginationDiv) {
+            paginationDiv = document.createElement('div');
+            paginationDiv.className = 'pagination';
+            document.querySelector('.data-section').appendChild(paginationDiv);
+        }
+
+        paginationDiv.innerHTML = `
+        <button class="page-btn" id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="page-info">第 ${currentPage} 页，共 ${totalPages} 页</span>
+        <button class="page-btn" id="nextPage" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}>
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
+
+        // 添加分页事件
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderCertificateTable();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCertificates.length / PAGE_SIZE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderCertificateTable();
+            }
+        });
+    }
+
+    // 显示添加证书模态框
+    function showAddCertificateModal() {
+        const modal = document.getElementById('certificateModal');
+        document.getElementById('modalTitle').textContent = '添加证书';
+        document.getElementById('certificateForm').reset();
+        document.getElementById('certificateForm').removeAttribute('data-id');
+        modal.style.display = 'flex';
+    }
+
+    function filterCertificates() {
+        const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+        const certificateType = document.getElementById('certificateType').value;
+
+        // 证书类型映射表
+        const certificateTypeMap = {
+            'CET-4': ['cet-4', 'cet4', '英语四级', '大学英语四级', '英语四级证书'],
+            'CET-6': ['cet-6', 'cet6', '英语六级', '大学英语六级', '英语六级证书'],
+            '计算机等级考试': ['计算机等级', '计算机二级', '计算机等级考试', '计算机二级证书']
+        };
+
+        filteredCertificates = certificates.filter(cert => {
+            if (currentUser.role === 'student' && currentUser.studentId) {
+                if (String(cert.studentId) !== String(currentUser.studentId)) {
+                    return false;
+                }
+            }
+
+            // 学生姓名或ID筛选
+            const studentMatches = String(cert.studentId).toLowerCase().includes(searchTerm) ||
+                getStudentName(cert.studentId).toLowerCase().includes(searchTerm);
+
+            // 证书类型筛选（使用映射表）
+            let typeMatches = true;
+            if (certificateType) {
+                const certNameLower = cert.name.toLowerCase();
+                typeMatches = certificateTypeMap[certificateType] ?
+                    certificateTypeMap[certificateType].some(keyword => certNameLower.includes(keyword.toLowerCase())) :
+                    cert.name.includes(certificateType);
+            }
+
+            return studentMatches && typeMatches;
+        });
+
+        // 重置到第一页
+        currentPage = 1;
+        renderCertificateTable();
+    }
+
+   function populateStudentSelect(selectedStudentId) {
+       const studentSelect = document.getElementById('formStudentId');
+
+       studentSelect.innerHTML = '<option value="">请选择学生</option>';
+
+       // 确保学生数据已加载
+       if (!studentsCache || studentsCache.length === 0) {
+           studentsCache = JSON.parse(localStorage.getItem('students') || '[]');
+           console.log('加载学生数据:', studentsCache.length);
+       }
+
+       // 输出学生数据用于调试
+       console.log('学生数据示例:', studentsCache.slice(0, 3));
+
+       studentsCache.forEach(student => {
+           const option = document.createElement('option');
+           option.value = String(student.id);
+           option.textContent = `${student.name} (学号:${student.studentId || student.id})`;
+
+           if (selectedStudentId && String(student.id) === String(selectedStudentId)) {
+               option.selected = true;
+           }
+
+           studentSelect.appendChild(option);
+       });
+   }
+
+    function editCertificate(certificateId) {
+        const certificate = certificates.find(c => c.id === certificateId);
+        if (!certificate) {
+            console.error('未找到对应的证书记录，ID:', certificateId);
+            return;
+        }
+
+        // 设置模态框标题
+        document.getElementById('modalTitle').textContent = '编辑证书';
+        document.getElementById('editCertificateId').value = certificate.id;
+
+        // 填充学生下拉框并选中当前学生
+        populateStudentSelect(certificate.studentId);
+
+        // 填充其他表单字段
+        document.getElementById('formCertificateName').value = certificate.name || '';
+        document.getElementById('formIssueDate').value = certificate.issueDate || '';
+        document.getElementById('formDescription').value = certificate.description || '';
+
+        // 显示模态框
+        document.getElementById('certificateModal').style.display = 'flex';
+    }
+
+    // 添加通知函数
+    function showNotification(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerText = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+   function handleSaveCertificate() {
+  const certificateId = document.getElementById('editCertificateId').value;
+  const studentId = document.getElementById('formStudentId').value;
+  const name = document.getElementById('formCertificateName').value;
+  const issueDate = document.getElementById('formIssueDate').value;
+  const description = document.getElementById('formDescription').value;
+
+  if (!studentId || !name || !issueDate) {
+    alert('请填写所有必填字段');
+    return;
+  }
+
+  // 从本地存储获取学生姓名
+  const studentName = getStudentNameById(studentId);
+  console.log(`保存证书使用学生: ID=${studentId}, 姓名=${studentName}`);
+
+  const certificateData = {
+    id: certificateId || generateUUID(),
+    studentId: studentId,
+    studentName: studentName, // 显式存储学生姓名
+    name: name,
+    issueDate: issueDate,
+    description: description
+  };
+
+  // 保存证书
+  saveCertificate(certificateData)
+    .then(() => {
+      document.getElementById('certificateModal').style.display = 'none';
+      loadCertificatesFromService();
+      showNotification('证书保存成功', 'success');
+    })
+    .catch(error => {
+      console.error('保存证书出错:', error);
+      alert('保存证书失败，请重试');
+    });
+}
+
+    function handleDeleteCertificate(certificateId) {
+        if (confirm('确定要删除此证书记录吗？')) {
+            deleteCertificate(certificateId)
+                .then(() => {
+                    loadCertificatesFromService();
+                    showNotification('证书已删除', 'success');
+                })
+                .catch(error => {
+                    console.error('删除证书出错:', error);
+                    alert('删除证书失败，请重试');
+                });
+        }
+    }
+
+    // 关闭模态框
+    function closeModal() {
+        const modal = document.getElementById('certificateModal');
+        modal.style.display = 'none';
+    }
+
+
+  function getStudentName(studentId) {
+    if (!studentId) return '未知学生';
+
+    // 确保学生缓存已加载
+    if (!studentsCache || studentsCache.length === 0) {
+      studentsCache = JSON.parse(localStorage.getItem('students') || '[]');
+    }
+
+    // 对ID进行字符串化比较
+    const student = studentsCache.find(s =>
+      String(s.id) === String(studentId) ||
+      (s.studentId && String(s.studentId) === String(studentId))
+    );
+
+    if (student) {
+      console.log(`找到学生: ${student.name}, ID=${studentId}`);
+      return student.name;
+    } else {
+      console.log(`未找到ID为${studentId}的学生，学生列表:`, studentsCache.slice(0, 3));
+      return '未知学生';
+    }
+  }
+
+    // 格式化日期显示
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('zh-CN');
+    }
+
+    // 导入数据功能
+    function importDataFromJson(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            alert('请选择一个 JSON 文件！');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                // 解析 JSON 数据
+                const data = JSON.parse(e.target.result);
+
+                // 验证数据结构
+                if (data.students && data.teachers && data.admins && data.courses && data.grades && data.certificates && data.users) {
+                    // 将数据存入 localStorage
+                    localStorage.setItem('students', JSON.stringify(data.students));
+                    localStorage.setItem('teachers', JSON.stringify(data.teachers));
+                    localStorage.setItem('admins', JSON.stringify(data.admins));
+                    localStorage.setItem('courses', JSON.stringify(data.courses));
+                    localStorage.setItem('grades', JSON.stringify(data.grades));
+                    localStorage.setItem('certificates', JSON.stringify(data.certificates));
+                    localStorage.setItem('users', JSON.stringify(data.users));
+
+                    // 如果包含当前用户信息，则更新
+                    if (data.currentUser) {
+                        localStorage.setItem('currentUser', JSON.stringify(data.currentUser));
+                    }
+
+                    alert('数据导入成功！请刷新页面以查看更新。');
+                } else {
+                    alert('文件格式不正确，请检查 JSON 数据结构！');
+                }
+            } catch (error) {
+                alert('导入失败：文件内容无效或解析错误！');
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    function exportDataToJson() {
+        // 获取证书数据
+        const certificates = JSON.parse(localStorage.getItem('certificates') || '[]');
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+
+        if (certificates.length === 0) {
+            alert('没有可导出的证书数据');
+            return;
+        }
+
+        // 使用JSZip创建压缩包
+        const zip = new JSZip();
+        let fileCount = 0;
+
+        // 遍历所有证书，为每个证书创建一个文件
+        certificates.forEach(cert => {
+            const student = students.find(s => String(s.studentId) === String(cert.studentId));
+            if (!student) {
+                console.log('找不到学生:', cert.studentId);
+                return;
+            }
+
+            // 构建文件名：姓名_学号_考试
+            const fileName = `${student.name}_${student.studentId}_${cert.name}.json`;
+
+            // 准备导出数据
+            const exportData = {
+                student: {
+                    name: student.name,
+                    studentId: student.studentId,
+                    class: student.class,
+                    major: student.major
+                },
+                certificate: cert
+            };
+
+            // 添加到zip
+            zip.file(fileName, JSON.stringify(exportData, null, 2));
+            fileCount++;
+        });
+
+        if (fileCount === 0) {
+            alert('没有找到有效的证书数据可导出');
+            return;
+        }
+
+        // 生成zip并下载
+        zip.generateAsync({type: 'blob'}).then(function(content) {
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'certificates.zip';
+            document.body.appendChild(a);
+            a.click();
+
+            // 清理
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        });
+
+        return true;
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 绑定导入按钮事件
+        document.getElementById('importDataBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        // 绑定文件输入事件
+        document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+
+        // 导出数据按钮点击事件绑定
+        document.getElementById('exportDataBtn').addEventListener('click', function() {
+            exportDataToJson();
+            showNotification('数据导出成功！', 'success');
+        });
+
+        currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        if (!currentUser.username) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // 确保基础数据已初始化
+        if (typeof initDefaultData === 'function') {
+            initDefaultData();
+        }
+
+        // 从localStorage加载学生数据
+        const students = JSON.parse(localStorage.getItem('students') || '[]');
+        console.log('已加载学生数据:', students.length);
+
+        loadCertificates();
+
+        // 填充学生下拉框
+        populateStudentSelect();
+
+        // 设置用户信息
+        document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+
+        // 检查用户权限
+        checkUserPermission();
+
+        // 绑定事件处理
+        document.getElementById('addCertificateBtn').addEventListener('click', showAddCertificateModal);
+        document.getElementById('filterBtn').addEventListener('click', filterCertificates);
+        document.getElementById('certificateForm').addEventListener('submit', saveCertificate);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+
+        // 检查用户权限
+        checkUserPermission();
+
+        // 添加表格响应式容器
+        wrapTableWithResponsiveContainer();
+
+        const importIcon = document.querySelector('#importDataBtn .icon');
+        importIcon.className = 'icon'; // 只保留基本icon类
+        importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+        const exportIcon = document.querySelector('#exportDataBtn .icon');
+        exportIcon.className = 'icon';
+        exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+        const logoutIcon = document.querySelector('#logoutBtn .icon');
+        logoutIcon.className = 'icon';
+        logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+        // 设置用户信息
+        document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+        const userRole = currentUser.role || 'student';
+        const roleMap = {
+            'student': '学生',
+            'teacher': '教师',
+            'admin': '管理员'
+        };
+        document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+        // 设置用户头像
+        const userAvatar = document.getElementById('userAvatar');
+        userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+
+        document.getElementById('addCertificateBtn').addEventListener('click', function() {
+            document.getElementById('modalTitle').textContent = '添加证书';
+            document.getElementById('editCertificateId').value = '';
+
+            // 重新填充学生下拉框
+            populateStudentSelect();
+
+            // 重置表单
+            document.getElementById('formCertificateName').value = '';
+            document.getElementById('formIssueDate').value = '';
+            document.getElementById('formDescription').value = '';
+
+            // 显示模态框
+            document.getElementById('certificateModal').style.display = 'flex';
+        });
+
+        // 关闭证书模态框
+        document.querySelectorAll('#closeCertificateModal, #cancelBtn').forEach(el => {
+            el.addEventListener('click', function() {
+                document.getElementById('certificateModal').style.display = 'none';
+            });
+        });
+
+        // 关闭确认删除模态框
+        document.querySelectorAll('#closeConfirmModal, #cancelDeleteBtn').forEach(el => {
+            el.addEventListener('click', function() {
+                document.getElementById('confirmModal').style.display = 'none';
+            });
+        });
+
+        document.getElementById('saveCertificateBtn').addEventListener('click', handleSaveCertificate);
+
+        // 确认删除按钮
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const certificateId = this.getAttribute('data-id');
+            if (certificateId) {
+                certificates = certificates.filter(c => c.id !== certificateId);
+                filteredCertificates = filteredCertificates.filter(c => c.id !== certificateId);
+                localStorage.setItem('certificates', JSON.stringify(certificates));
+                renderCertificateTable();
+                document.getElementById('confirmModal').style.display = 'none';
+                showNotification('证书记录已删除', 'success');
+            }
+        });
+
+        const captureHandler = function(e) {
+            // 记录事件传播路径
+            if (e.target.id === 'studentSearch' || e.target.closest('#studentSearch')) {
+                console.log('搜索框被点击了，但事件可能被阻止');
+                // 阻止其他处理器干扰
+                e.stopImmediatePropagation();
+            }
+        };
+
+        // 在捕获阶段处理点击事件
+        document.addEventListener('click', captureHandler, true);
+        document.addEventListener('mousedown', captureHandler, true);
+        document.addEventListener('focus', captureHandler, true);
+
+        const searchInput = document.getElementById('studentSearch');
+        if (searchInput) {
+                searchInput.disabled = false;
+
+                // 确保能够获得焦点
+                searchInput.tabIndex = 1;
+
+
+                searchInput.onfocus = function(e) {
+                    console.log('搜索框获得焦点');
+                };
+
+                searchInput.onclick = function(e) {
+                    console.log('搜索框被点击');
+                    e.stopPropagation();
+                };
+
+                searchInput.oninput = function() {
+                    console.log('输入内容:', this.value);
+                };
+
+                searchInput.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        filterCertificates();
+                    }
+                };
+        }
+
+        const filterBtn = document.getElementById('filterBtn');
+        if (filterBtn) {
+            filterBtn.onclick = filterCertificates;
+        }
+
+        // 退出登录
+        document.querySelectorAll('#logoutBtn, #logoutBtnBottom').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
