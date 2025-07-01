@@ -1,0 +1,747 @@
+<!--本文件的功能：
+1.重置搜索功能 - 清除搜索表单并显示所有学生
+2.分页控制 - 实现前后页切换
+3.添加学生 - 打开模态框并验证表单
+4.编辑学生 - 预填充表单并允许修改
+5.删除学生 - 显示确认对话框并删除
+6.查看学生详情 - 跳转到学生详情页
+7.表单验证 - 确保所有必填字段都有合法输入
+-->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理 | 学业管理系统</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="javascript/shared-functions.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边导航 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="app-logo">
+                    <h2>学业管理系统</h2>
+                </div>
+                <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                    <i class="fas fa-angle-left"></i>
+                    <span class="tooltip-text">收起/展开侧边栏</span>
+                </button>
+            </div>
+
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar"></div>
+                <div class="user-info">
+                    <h4 id="userName">加载中...</h4>
+                    <p id="userRole" class="user-role">加载中...</p>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="dashboard.html">
+                        <span class="icon dashboard-icon"></span>
+                        <span class="title">首页</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="student-management.html">
+                        <span class="icon students-icon"></span>
+                        <span class="title">学生管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="course-management.html">
+                        <span class="icon courses-icon"></span>
+                        <span class="title">课程管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="grade-management.html">
+                        <span class="icon grades-icon"></span>
+                        <span class="title">成绩管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="certificate-management.html">
+                        <span class="icon certificate-icon"></span>
+                        <span class="title">证书管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="statistics.html">
+                        <span class="icon statistics-icon"></span>
+                        <span class="title">成绩统计</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button id="importDataBtn" class="import-btn">
+                    <span class="icon upload-icon"></span>
+                    <span class="title">导入数据</span>
+                </button>
+                <input type="file" id="fileInput" accept=".json" style="display: none;" />
+
+                <button id="exportDataBtn" class="export-btn">
+                    <span class="icon download-icon"></span>
+                    <span class="title">导出数据</span>
+                </button>
+
+                <button id="logoutBtn" class="logout-btn">
+                    <span class="icon logout-icon"></span>
+                    <span class="title">退出登录</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <div class="content-body">
+                <!-- 学生搜索 -->
+                <div class="search-card">
+                    <h2>学生查询</h2>
+                    <div class="search-form">
+                        <div class="search-row">
+                            <div class="form-group">
+                                <label for="studentId">学号</label>
+                                <input type="text" id="studentId" placeholder="请输入学号">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentName">姓名</label>
+                                <input type="text" id="studentName" placeholder="请输入姓名">
+                            </div>
+                            <div class="form-group">
+                                <label>年龄范围</label>
+                                <div class="age-range">
+                                    <input type="number" id="minAge" placeholder="最小年龄" min="15" max="50">
+                                    <span class="range-separator">至</span>
+                                    <input type="number" id="maxAge" placeholder="最大年龄" min="15" max="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="studentMajor">专业</label>
+                                <select id="studentMajor">
+                                    <option value="">全部专业</option>
+                                    <option value="计算机科学与技术">计算机科学与技术</option>
+                                    <option value="软件工程">软件工程</option>
+                                    <option value="数据科学">数据科学</option>
+                                    <option value="人工智能">人工智能</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="search-buttons">
+                            <button class="btn btn-primary" id="searchBtn">查询</button>
+                            <button class="btn btn-outline" id="resetBtn">重置</button>
+                            <button class="btn btn-success" id="addStudentBtn">添加学生</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 学生列表 -->
+                <div class="list-card" id="studentTableContainer" style="display: none;">
+                    <h2>学生列表</h2>
+                    <div class="table-container">
+                        <table class="data-table" id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>性别</th>
+                                    <th>年龄</th>
+                                    <th>专业</th>
+                                    <th>年级</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 数据将通过JS动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <button class="page-btn" data-page="prev">上一页</button>
+                        <div class="page-numbers" id="pageNumbers">
+                            <button class="page-number active">1</button>
+                        </div>
+                        <button class="page-btn" data-page="next">下一页</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加/编辑学生弹窗 -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加学生</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <input type="hidden" id="editStudentId">
+                    <div class="form-group">
+                        <label for="formStudentId">学号*</label>
+                        <input type="text" id="formStudentId" required>
+                        <span class="error-message" id="formStudentId-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formName">姓名*</label>
+                        <input type="text" id="formName" required>
+                        <span class="error-message" id="formName-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>性别*</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="男" checked>
+                                <span>男</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="女">
+                                <span>女</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="formAge">年龄*</label>
+                        <input type="number" id="formAge" min="15" max="50" required>
+                        <span class="error-message" id="formAge-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formMajor">专业*</label>
+                        <select id="formMajor" required>
+                            <option value="">请选择专业</option>
+                            <option value="计算机科学与技术">计算机科学与技术</option>
+                            <option value="软件工程">软件工程</option>
+                            <option value="数据科学">数据科学</option>
+                            <option value="人工智能">人工智能</option>
+                        </select>
+                        <span class="error-message" id="formMajor-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formGrade">年级*</label>
+                        <select id="formGrade" required>
+                            <option value="">请选择年级</option>
+                            <option value="大一">大一</option>
+                            <option value="大二">大二</option>
+                            <option value="大三">大三</option>
+                            <option value="大四">大四</option>
+                        </select>
+                        <span class="error-message" id="formGrade-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="formEmail">邮箱</label>
+                        <input type="email" id="formEmail">
+                        <span class="error-message" id="formEmail-error"></span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveStudentBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content small-modal">
+            <div class="modal-header warning">
+                <h2>确认删除</h2>
+                <button class="modal-close" id="closeConfirmModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>您确定要删除学生 <span id="deleteStudentName"></span> (<span id="deleteStudentId"></span>) 吗？</p>
+                <p class="warning-text">此操作不可逆，学生所有相关数据（包括成绩、选课记录等）将被删除。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="javascript/auth.js"></script>
+    <script type="module" src="javascript/dataService.js"></script>
+    <script type="module" src="javascript/validator.js"></script>
+    <script>
+        // 渲染学生列表
+        function renderStudentTable() {
+            const tbody = document.querySelector('#studentTable tbody');
+            tbody.innerHTML = '';
+
+            // 计算当前页应显示的数据
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageStudents = filteredStudents.slice(startIndex, endIndex);
+
+            if (pageStudents.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="7" class="no-data">未找到匹配的学生记录</td>';
+                tbody.appendChild(tr);
+            } else {
+                pageStudents.forEach(student => {
+                    const tr = document.createElement('tr');
+
+                    // 创建基本信息列
+                    tr.innerHTML = `
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.gender}</td>
+                        <td>${student.age}</td>
+                        <td>${student.major}</td>
+                        <td>${student.grade}</td>
+                    `;
+
+                    // 创建操作列
+                    const actionsCell = document.createElement('td');
+                    actionsCell.className = 'student-actions';
+
+                    // 查看按钮
+                    const viewBtn = document.createElement('button');
+                    viewBtn.className = 'btn btn-sm btn-success';
+                    viewBtn.textContent = '查看';
+                    viewBtn.onclick = function() { viewStudentDetails(student.id); };
+
+                    // 编辑按钮
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn btn-sm btn-primary';
+                    editBtn.textContent = '编辑';
+                    editBtn.onclick = function() { editStudent(student.id); };
+
+                    // 删除按钮
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-sm btn-danger';
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.onclick = function() { showDeleteConfirmation(student.id, student.name); };
+
+                    // 添加按钮到单元格
+                    actionsCell.appendChild(viewBtn);
+                    actionsCell.appendChild(editBtn);
+                    actionsCell.appendChild(deleteBtn);
+                    tr.appendChild(actionsCell);
+
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // 更新分页
+            updatePagination();
+        }
+
+        // 更新分页控件
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
+
+            // 生成页码
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderStudentTable();
+                });
+                pageNumbers.appendChild(pageBtn);
+            }
+
+            // 更新上一页/下一页按钮状态
+            document.querySelector('[data-page="prev"]').disabled = currentPage === 1;
+            document.querySelector('[data-page="next"]').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // 编辑学生
+        function editStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                document.getElementById('modalTitle').textContent = '编辑学生';
+
+                // 填充表单数据
+                document.getElementById('editStudentId').value = student.id;
+                document.getElementById('formStudentId').value = student.id;
+                document.getElementById('formStudentId').disabled = true;
+                document.getElementById('formName').value = student.name;
+                document.getElementById('formAge').value = student.age;
+                document.getElementById('formMajor').value = student.major;
+                document.getElementById('formGrade').value = student.grade;
+                document.getElementById('formEmail').value = student.email || '';
+
+                // 设置性别
+                document.querySelectorAll('input[name="gender"]').forEach(radio => {
+                    if (radio.value === student.gender) {
+                        radio.checked = true;
+                    }
+                });
+
+                // 清除错误信息
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+                // 显示弹窗
+                document.getElementById('studentModal').style.display = 'flex';
+            }
+        }
+
+        // 查看学生详情
+        function viewStudentDetails(studentId) {
+            // 跳转到学生详情页面
+            window.location.href = `display.html?id=${studentId}`;
+        }
+
+        // 删除确认
+        function showDeleteConfirmation(studentId, studentName) {
+            document.getElementById('deleteStudentId').textContent = studentId;
+            document.getElementById('deleteStudentName').textContent = studentName;
+            document.getElementById('confirmModal').style.display = 'flex';
+
+            // 设置确认删除按钮的点击行为
+            document.getElementById('confirmDeleteBtn').onclick = () => {
+                deleteStudent(studentId);
+            };
+        }
+
+        // 删除学生
+        function deleteStudent(studentId) {
+            students = students.filter(student => student.id !== studentId);
+            filteredStudents = filteredStudents.filter(student => student.id !== studentId);
+
+            // 更新本地存储
+            localStorage.setItem('students', JSON.stringify(students));
+
+            // 关闭确认弹窗
+            document.getElementById('confirmModal').style.display = 'none';
+
+            // 如果当前页没有数据了，转到前一页
+            const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            }
+
+            // 重新渲染表格
+            renderStudentTable();
+
+            // 显示成功消息
+            showNotification('删除成功', 'success');
+        }
+
+        // 表单验证
+        function validateStudentForm() {
+            let isValid = true;
+
+            // 清除所有错误信息
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+            // 学号验证
+            const studentIdInput = document.getElementById('formStudentId');
+            if (!studentIdInput.value.trim()) {
+                document.getElementById('formStudentId-error').textContent = '请输入学号';
+                isValid = false;
+            } else if (!/^S\d{3}$/.test(studentIdInput.value.trim())) {
+                document.getElementById('formStudentId-error').textContent = '学号格式错误，应为S开头加3位数字';
+                isValid = false;
+            }
+
+            // 姓名验证
+            const nameInput = document.getElementById('formName');
+            if (!nameInput.value.trim()) {
+                document.getElementById('formName-error').textContent = '请输入姓名';
+                isValid = false;
+            }
+
+            // 年龄验证
+            const ageInput = document.getElementById('formAge');
+            const age = parseInt(ageInput.value);
+            if (!ageInput.value.trim()) {
+                document.getElementById('formAge-error').textContent = '请输入年龄';
+                isValid = false;
+            } else if (isNaN(age) || age < 15 || age > 50) {
+                document.getElementById('formAge-error').textContent = '年龄必须在15-50之间';
+                isValid = false;
+            }
+
+            // 专业验证
+            const majorSelect = document.getElementById('formMajor');
+            if (!majorSelect.value) {
+                document.getElementById('formMajor-error').textContent = '请选择专业';
+                isValid = false;
+            }
+
+            // 年级验证
+            const gradeSelect = document.getElementById('formGrade');
+            if (!gradeSelect.value) {
+                document.getElementById('formGrade-error').textContent = '请选择年级';
+                isValid = false;
+            }
+
+            // 邮箱验证（如果有值）
+            const emailInput = document.getElementById('formEmail');
+            if (emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
+                document.getElementById('formEmail-error').textContent = '请输入有效的邮箱地址';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerText = message;
+            document.body.appendChild(toast);
+
+            // 让toast显示出来
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+
+            // 3秒后关闭
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('expanded');
+
+            // 根据侧边栏状态切换图标方向
+            const icon = this.querySelector('i');
+            if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                icon.classList.remove('fa-angle-left');
+                icon.classList.add('fa-angle-right');
+            } else {
+                icon.classList.remove('fa-angle-right');
+                icon.classList.add('fa-angle-left');
+            }
+        });
+
+        // 全局变量声明
+        let students = [];
+        let filteredStudents = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            importIcon.className = 'icon'; // 只保留基本icon类
+            importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            exportIcon.className = 'icon';
+            exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            logoutIcon.className = 'icon';
+            logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+            document.getElementById('importDataBtn').addEventListener('click', function () {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', importDataFromJson);
+            // 获取当前用户信息
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+            if (!currentUser.username) {
+                // 如果未登录，跳转到登录页
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            const userRole = currentUser.role || 'student';
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+            // 设置用户头像
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+            students = JSON.parse(localStorage.getItem('students') || '[]');
+            filteredStudents = [...students];
+            currentPage = 1;
+
+
+            // 搜索学生
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                console.log('搜索按钮被点击');
+
+                const studentId = document.getElementById('studentId').value.trim();
+                const studentName = document.getElementById('studentName').value.trim();
+                const minAge = document.getElementById('minAge').value;
+                const maxAge = document.getElementById('maxAge').value;
+                const major = document.getElementById('studentMajor').value;
+
+                console.log('搜索学号:', studentId);
+
+                filteredStudents = students.filter(student => {
+                    let match = true;
+
+                    if (studentId && !String(student.id).toLowerCase().includes(studentId.toLowerCase())) {
+                        match = false;
+                    }
+
+                    if (studentName && !student.name.includes(studentName)) {
+                        match = false;
+                    }
+
+                    if (minAge && student.age < parseInt(minAge)) {
+                        match = false;
+                    }
+
+                    if (maxAge && student.age > parseInt(maxAge)) {
+                        match = false;
+                    }
+
+                    if (major && student.major !== major) {
+                        match = false;
+                    }
+
+                    return match;
+                });
+
+                console.log('过滤后的学生:', filteredStudents);
+                console.log('原始学生数据:', students);
+
+                currentPage = 1;
+                // 在"查询"按钮事件处理器中添加显示表格的代码
+                document.getElementById('studentTableContainer').style.display = 'block';
+                renderStudentTable();
+            });
+
+           // 重置搜索
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                // 隐藏学生表格容器
+                document.getElementById('studentTableContainer').style.display = 'none';
+
+                // 清空表单字段
+                document.getElementById('studentId').value = '';
+                document.getElementById('studentName').value = '';
+                document.getElementById('minAge').value = '';
+                document.getElementById('maxAge').value = '';
+                document.getElementById('studentMajor').value = '';
+
+                filteredStudents = [...students];
+                currentPage = 1;
+            });
+
+            // 分页控制
+            document.querySelector('[data-page="prev"]').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderStudentTable();
+                }
+            });
+
+            document.querySelector('[data-page="next"]').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderStudentTable();
+                }
+            });
+
+            // 添加学生弹窗
+            document.getElementById('addStudentBtn').addEventListener('click', () => {
+                document.getElementById('modalTitle').textContent = '添加学生';
+                document.getElementById('studentForm').reset();
+                document.getElementById('formStudentId').disabled = false;
+                document.getElementById('editStudentId').value = '';
+
+                // 清除错误信息
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+                // 显示弹窗
+                document.getElementById('studentModal').style.display = 'flex';
+            });
+
+
+
+            // 保存学生信息
+            document.getElementById('saveStudentBtn').addEventListener('click', () => {
+                if (validateStudentForm()) {
+                    const formStudentId = document.getElementById('formStudentId').value.trim();
+                    const editStudentId = document.getElementById('editStudentId').value.trim();
+                    const isEditing = !!editStudentId;
+
+                    // 获取表单数据
+                    const studentData = {
+                        id: formStudentId,
+                        name: document.getElementById('formName').value.trim(),
+                        gender: document.querySelector('input[name="gender"]:checked').value,
+                        age: parseInt(document.getElementById('formAge').value),
+                        major: document.getElementById('formMajor').value,
+                        grade: document.getElementById('formGrade').value,
+                        email: document.getElementById('formEmail').value.trim()
+                    };
+
+                    // 如果是添加新学生，检查ID是否已存在
+                    if (!isEditing && students.some(s => s.id === studentData.id)) {
+                        document.getElementById('formStudentId-error').textContent = '学号已存在';
+                        return;
+                    }
+
+                    if (isEditing) {
+                        // 更新现有学生
+                        students = students.map(s => s.id === editStudentId ? studentData : s);
+                        filteredStudents = filteredStudents.map(s => s.id === editStudentId ? studentData : s);
+                        showNotification('学生信息已更新', 'success');
+                    } else {
+                        // 添加新学生
+                        students.push(studentData);
+                        filteredStudents.push(studentData);
+                        showNotification('学生添加成功', 'success');
+                    }
+
+                    // 更新本地存储
+                    localStorage.setItem('students', JSON.stringify(students));
+
+                    // 关闭弹窗并重新渲染表格
+                    document.getElementById('studentModal').style.display = 'none';
+                    renderStudentTable();
+                }
+            });
+
+            // 关闭弹窗
+            document.querySelectorAll('.modal-close, #cancelBtn').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.getElementById('studentModal').style.display = 'none';
+                });
+            });
+
+            document.querySelectorAll('#closeConfirmModal, #cancelDeleteBtn').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.getElementById('confirmModal').style.display = 'none';
+                });
+            });
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

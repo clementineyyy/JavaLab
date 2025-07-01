@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学业管理系统 | 成绩统计</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout-fixes.css">
+    <script src="javascript/common.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+<div class="layout">
+    <!-- 侧边栏部分 (与其他页面相同) -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <h2>学业管理系统</h2>
+            </div>
+            <button id="sidebarToggle" class="sidebar-toggle" title="收起/展开侧边栏">
+                <i class="fas fa-angle-left"></i>
+                <span class="tooltip-text">收起/展开侧边栏</span>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar"></div>
+            <div class="user-info">
+                <h4 id="userName">加载中...</h4>
+                <p id="userRole" class="user-role">加载中...</p>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html">
+                    <span class="icon dashboard-icon"></span>
+                    <span class="title">首页</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="student-management.html">
+                    <span class="icon students-icon"></span>
+                    <span class="title">学生管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="course-management.html">
+                    <span class="icon courses-icon"></span>
+                    <span class="title">课程管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="grade-management.html">
+                    <span class="icon grades-icon"></span>
+                    <span class="title">成绩管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu">
+                <a href="certificate-management.html">
+                    <span class="icon certificate-icon"></span>
+                    <span class="title">证书管理</span>
+                </a>
+            </li>
+            <li class="nav-item student-menu teacher-menu admin-menu active">
+                <a href="statistics.html">
+                    <span class="icon statistics-icon"></span>
+                    <span class="title">成绩统计</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <button id="importDataBtn" class="import-btn">
+                <span class="icon upload-icon"></span>
+                <span class="title">导入数据</span>
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;"/>
+
+            <button id="exportDataBtn" class="export-btn">
+                <span class="icon download-icon"></span>
+                <span class="title">导出数据</span>
+            </button>
+
+            <button id="logoutBtn" class="logout-btn">
+                <span class="icon logout-icon"></span>
+                <span class="title">退出登录</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 主内容区域 - 修改后的代码 -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            <div class="top-bar">
+                <h1>成绩统计</h1>
+                <p>查看学生成绩数据统计</p>
+            </div>
+
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>成绩数据分析</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- 筛选栏 -->
+                        <div class="filter-bar">
+                            <div class="filter-group">
+                                <label for="studentIdFilter">学号：</label>
+                                <input type="text" id="studentIdFilter" placeholder="按学号筛选">
+                            </div>
+                            <div class="filter-group">
+                                <label for="courseFilter">课程：</label>
+                                <select id="courseFilter">
+                                    <option value="">所有课程</option>
+                                </select>
+                            </div>
+                            <button id="filterBtn" class="btn btn-primary">筛选</button>
+                            <button id="resetFilterBtn" class="btn btn-secondary">重置</button>
+                        </div>
+
+                        <!-- 数据表格 -->
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th>学号</th>
+                                    <th>姓名</th>
+                                    <th>课程</th>
+                                    <th>成绩</th>
+                                    <th>排名</th>
+                                    <th>统计</th>
+                                </tr>
+                                </thead>
+                                <tbody id="statisticsTableBody">
+                                <!-- 数据将通过JavaScript动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 统计图表区域 -->
+                        <div class="statistics-charts">
+                            <div class="chart-card">
+                                <h3>班级成绩分布</h3>
+                                <div id="gradeDistributionChart" class="chart-container">
+                                    <p class="placeholder-text">成绩分布图表将显示在这里</p>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>个人成绩趋势</h3>
+                                <div id="personalTrendChart" class="chart-container">
+                                    <p class="placeholder-text">选择学生后显示个人成绩趋势</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        // 加载成绩统计数据
+        function loadStatisticsData() {
+            // 从localStorage获取数据
+            const students = JSON.parse(localStorage.getItem('students') || '[]');
+            const grades = JSON.parse(localStorage.getItem('grades') || '[]');
+            const courses = JSON.parse(localStorage.getItem('courses') || '[]');
+
+            // 清空表格内容
+            const tableBody = document.getElementById('statisticsTableBody');
+            tableBody.innerHTML = '';
+
+            // 按学生分组成绩数据
+            const studentGrades = {};
+            students.forEach(student => {
+                studentGrades[student.id] = {
+                    student: student,
+                    grades: grades.filter(grade => grade.studentId === student.id),
+                    stats: {
+                        average: 0,
+                        highest: 0,
+                        lowest: 100,
+                        totalCourses: 0
+                    }
+                };
+            });
+
+            // 计算统计数据
+            Object.keys(studentGrades).forEach(studentId => {
+                const data = studentGrades[studentId];
+                if (data.grades.length > 0) {
+                    const scores = data.grades.map(grade => grade.score);
+                    data.stats.average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                    data.stats.highest = Math.max(...scores);
+                    data.stats.lowest = Math.min(...scores);
+                    data.stats.totalCourses = data.grades.length;
+                }
+            });
+
+            // 计算排名
+            const rankedStudents = Object.values(studentGrades)
+                .filter(data => data.grades.length > 0)
+                .sort((a, b) => b.stats.average - a.stats.average);
+
+            // 填充表格
+            rankedStudents.forEach((data, index) => {
+                const student = data.student;
+                const stats = data.stats;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${student.studentId}</td>
+            <td>${student.name}</td>
+            <td>${stats.totalCourses}门</td>
+            <td>${stats.average.toFixed(1)}分</td>
+            <td>${index + 1}</td>
+            <td>最高: ${stats.highest}分 | 最低: ${stats.lowest}分</td>
+        `;
+                tableBody.appendChild(row);
+            });
+
+            // 更新课程筛选下拉框
+            const courseFilter = document.getElementById('courseFilter');
+            courseFilter.innerHTML = '<option value="">所有课程</option>';
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = course.name;
+                courseFilter.appendChild(option);
+            });
+
+            // 如果没有数据，显示提示
+            if (rankedStudents.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = '<td colspan="6" class="no-data">暂无成绩数据</td>';
+                tableBody.appendChild(emptyRow);
+            }
+        }
+
+        // 筛选功能
+        function setupFilters() {
+            const filterBtn = document.getElementById('filterBtn');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+            filterBtn.addEventListener('click', function() {
+                const studentIdFilter = document.getElementById('studentIdFilter').value.trim();
+                const courseFilter = document.getElementById('courseFilter').value;
+
+                filterStatisticsData(studentIdFilter, courseFilter);
+            });
+
+            resetFilterBtn.addEventListener('click', function() {
+                document.getElementById('studentIdFilter').value = '';
+                document.getElementById('courseFilter').value = '';
+                loadStatisticsData();
+            });
+        }
+
+        // 筛选数据
+        function filterStatisticsData(studentId, courseId) {
+            // 实现筛选逻辑...
+            // 类似loadStatisticsData但根据条件过滤数据
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const importIcon = document.querySelector('#importDataBtn .icon');
+            importIcon.className = 'icon'; // 只保留基本icon类
+            importIcon.innerHTML = '<i class="fas fa-upload"></i>';
+
+            const exportIcon = document.querySelector('#exportDataBtn .icon');
+            exportIcon.className = 'icon';
+            exportIcon.innerHTML = '<i class="fas fa-download"></i>';
+
+            const logoutIcon = document.querySelector('#logoutBtn .icon');
+            logoutIcon.className = 'icon';
+            logoutIcon.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+
+            // 初始化默认数据
+            if(typeof initDefaultData === 'function') {
+                initDefaultData();
+            }
+
+            // 获取当前用户信息
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+            if (!currentUser.username) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 设置用户信息
+            document.getElementById('userName').textContent = currentUser.name || currentUser.username;
+            const userRole = currentUser.role || 'student';
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            document.getElementById('userRole').textContent = roleMap[userRole] || '用户';
+
+            // 设置用户头像
+            const userAvatar = document.getElementById('userAvatar');
+            userAvatar.textContent = (currentUser.name || currentUser.username).charAt(0).toUpperCase();
+
+            // 显示相应的菜单
+            if(typeof showMenusByRole === 'function') {
+                showMenusByRole(userRole);
+            }
+
+            // 侧边栏切换
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('collapsed');
+                document.querySelector('.main-content').classList.toggle('expanded');
+
+                // 根据侧边栏状态切换图标方向
+                const icon = this.querySelector('i');
+                if (document.querySelector('.sidebar').classList.contains('collapsed')) {
+                    icon.classList.remove('fa-angle-left');
+                    icon.classList.add('fa-angle-right');
+                } else {
+                    icon.classList.remove('fa-angle-right');
+                    icon.classList.add('fa-angle-left');
+                }
+            });
+
+            loadStatisticsData();
+
+            // 设置筛选功能
+            setupFilters();
+        });
+    </script>
+</body>
+</html>
