@@ -1,0 +1,48 @@
+{
+  "S001" : {
+    "id" : "94d1b5ff-22d7-4fb8-a80a-e5aec7b21edf",
+    "name" : "张三",
+    "studentId" : "S001",
+    "grade" : 3,
+    "major" : "软件工程",
+    "certificates" : [ ],
+    "grades" : [ {
+      "courseName" : "程序设计",
+      "studentId" : "94d1b5ff-22d7-4fb8-a80a-e5aec7b21edf",
+      "courseId" : "fb5f7313-771f-430c-bfa2-49c389d8cbe1",
+      "score" : 92.0,
+      "recordDate" : [ 2023, 6, 15 ],
+      "semester" : "2023-春季",
+      "id" : "d0b7fc5f-8558-4315-8985-25aaac3494e0"
+    }, {
+      "courseName" : "大学物理",
+      "studentId" : "94d1b5ff-22d7-4fb8-a80a-e5aec7b21edf",
+      "courseId" : "0cbc6ebe-0801-4d8e-85a1-41ed3a932507",
+      "score" : 65.0,
+      "recordDate" : [ 2023, 6, 22 ],
+      "semester" : "2023-春季",
+      "id" : "e019b9b7-3292-41b3-85a0-903199cfc0e4"
+    } ],
+    "age" : 25,
+    "role" : "学生"
+  },
+  "S002" : {
+    "id" : "423e857d-855d-4824-ad68-3c28d2fcb6b4",
+    "name" : "李四",
+    "studentId" : "S002",
+    "grade" : 2,
+    "major" : "数学",
+    "certificates" : [ {
+      "id" : "86da57fa-a4da-448d-96d6-6f8737accb20",
+      "studentId" : "423e857d-855d-4824-ad68-3c28d2fcb6b4",
+      "name" : "CET",
+      "level" : 4,
+      "issueDate" : [ 2023, 6, 10 ],
+      "issuingAuthority" : "教育部考试中心",
+      "valid" : true
+    } ],
+    "grades" : [ ],
+    "age" : 23,
+    "role" : "学生"
+  }
+}
